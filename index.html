@@ -148,40 +148,59 @@
         
         #reward-stage { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020208; z-index: 9999; }
         .warp-lines { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px); background-size: 100% 100%, 40px 100%; opacity: 0; }
-        .rocket-sprite { position: absolute; left: -180px; top: 45%; width: 150px; }
+        .rocket-sprite { position: absolute; width: 150px; }
         .screen-flash { position: absolute; width:100%; height:100%; background: #00f2ff; opacity: 0; pointer-events: none; }
         .hud-overlay { position: absolute; top: 15%; left: 0; width: 100%; color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace; text-shadow: 0 0 10px #00ff66; letter-spacing: 2px; }
 
-        @keyframes dynamicFly {
+        /* STANDARD TIMING DIRECTION (Sectors 1 & 2: Left to Right) */
+        .rocket-horizontal { left: -180px; top: 45%; }
+        @keyframes dynamicFlyHorizontal {
             0% { left: -180px; transform: scale(0.7); }
             30% { left: calc(50% - 75px); transform: scale(1.1); }
             60% { left: calc(50% - 75px); transform: scale(1.1); }
             65% { left: calc(50% - 85px); transform: scale(1.15); }
             100% { left: 120vw; transform: scale(1.6); }
         }
-        @keyframes engineThrottle {
+        @keyframes engineThrottleHorizontal {
             0% { transform: scaleX(0.5); opacity: 0.5; }
             59% { transform: scaleX(0.6); opacity: 0.7; }
             60% { transform: scaleX(3.5) scaleY(1.8); fill: #00f2ff; filter: drop-shadow(0 0 15px #00f2ff); opacity: 1; }
             100% { transform: scaleX(2.5) scaleY(1.2); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
         }
+
+        /* NEW FINALE TRAJECTORY (Sector 3: Vertical Skyrocket Launch) */
+        .rocket-vertical { left: calc(50% - 75px); top: 110vh; }
+        @keyframes dynamicFlyVertical {
+            0% { top: 110vh; transform: scale(0.7) rotate(-90deg); }
+            30% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); } /* Rise up and hover in center */
+            60% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); } /* Hold positioning stable */
+            65% { top: calc(50% - 65px); transform: scale(1.15) rotate(-90deg); } /* Sink slightly down under thrust load */
+            100% { top: -150vh; transform: scale(1.8) rotate(-90deg); } /* Zoom straight up out of frame */
+        }
+        @keyframes engineThrottleVertical {
+            0% { transform: scaleX(0.5); opacity: 0.5; }
+            59% { transform: scaleX(0.6); opacity: 0.7; }
+            60% { transform: scaleX(4.5) scaleY(2.2); fill: #ffe600; filter: drop-shadow(0 0 20px #ffe600); opacity: 1; } /* Mega-blast yellow/white flame explosion */
+            100% { transform: scaleX(3.0) scaleY(1.4); fill: #ff3300; filter: drop-shadow(0 0 30px #ff3300); opacity: 1; }
+        }
+
         @keyframes warpDrive { 0% { opacity: 0; background-size: 100% 100%, 10px 100%; } 60% { opacity: 0.3; } 100% { opacity: 1; background-size: 100% 100%, 800px 100%; } }
         @keyframes flashTrigger { 0% { opacity:0; } 60% { opacity:0; } 62% { opacity:0.25; background:#fff; } 65% { opacity:0.15; background:#00f2ff; } 100% { opacity:0; } }
 
         .run-warp { animation: warpDrive 3.5s cubic-bezier(0.1, 0.8, 0.1, 1) forwards; }
-        .run-rocket { animation: dynamicFly 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         .run-flash { animation: flashTrigger 3.5s ease-out forwards; }
-        .active-fire { animation: engineThrottle 3.5s linear infinite; transform-origin: left center; }
     </style>
 </head>
 <body>
 <div id="reward-stage">
     <div id="flash" class="screen-flash"></div>
     <div id="warp" class="warp-lines"></div>
-    <div class="hud-overlay">⚡ HYPER-DRIVE ENGAGED ⚡</div>
+    <div id="hud-alert" class="hud-overlay">⚡ HYPER-DRIVE ENGAGED ⚡</div>
+    
+    <!-- Unified ship asset container whose paths adjust dynamically to execution orders -->
     <div id="rocket" class="rocket-sprite">
         <svg viewBox="0 0 120 100" width="100%">
-            <path id="booster-flame" class="active-fire" d="M25,50 L2,42 L8,50 L2,58 Z" fill="#ff007f"/>
+            <path id="booster-flame" d="M25,50 L2,42 L8,50 L2,58 Z" fill="#ff007f"/>
             <path d="M25,50 L12,47 L15,50 L12,53 Z" fill="#ffcc00"/>
             <path d="M95,50 C70,62 40,62 25,50 C40,38 70,38 95,50 Z" fill="#e0e0e0" stroke="#00f2ff" stroke-width="2"/>
             <path d="M45,39 L30,20 L35,39 Z" fill="#ff007f"/>
@@ -222,7 +241,6 @@
                     <div style="color: #ff007f;">-<span id="num2">0</span></div>
                 </div>
                 
-                <!-- FIXED: Label text dynamically updated to link with your collector terminals -->
                 <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px; margin-top: auto; border: 1px solid #555;">🗑️ Reset Collectors</button>
             </div>
 
@@ -370,36 +388,62 @@
         document.getElementById("ones-count").innerText = countOnes;
     }
 
-    /* FIXED: Rewritten clear loop engine to correctly isolate and erase block child nodes */
     function clearBins() {
         let binTens = document.getElementById("tens-bin");
         let rods = binTens.getElementsByClassName("token-rod");
-        while(rods.length > 0) { rods[0].remove(); }
+        while(rods.length > 0) { rods.remove(); }
         
         let binOnes = document.getElementById("ones-bin");
         let cubes = binOnes.getElementsByClassName("token-cube");
-        while(cubes.length > 0) { cubes[0].remove(); }
+        while(cubes.length > 0) { cubes.remove(); }
         
         document.getElementById("feed").innerText = "";
         updateCounters();
     }
 
+    /* UPDATED: Dynamic Kinematic Router for Sector 3 Finale Trajectory Mapping */
     function playRewardAnimation(callback) {
         const stage = document.getElementById('reward-stage');
         const flash = document.getElementById('flash');
         const warp = document.getElementById('warp');
         const rocket = document.getElementById('rocket');
+        const flame = document.getElementById('booster-flame');
+        const hud = document.getElementById('hud-alert');
 
         stage.style.display = 'block';
         flash.className = 'screen-flash run-flash';
         warp.className = 'warp-lines run-warp';
-        rocket.className = 'rocket-sprite run-rocket';
+
+        // Check if we are finalizing Sector 3
+        if (currentSector === 3) {
+            hud.innerText = "🚨 ORBITAL ASCENT PROFILE LOCKED 🚨";
+            hud.style.color = "#ffe600";
+            hud.style.textShadow = "0 0 10px #ffe600";
+            
+            rocket.className = 'rocket-sprite rocket-vertical';
+            rocket.style.animation = 'dynamicFlyVertical 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+            flame.className = 'active-fire';
+            flame.style.animation = 'engineThrottleVertical 3.5s linear infinite';
+        } else {
+            // Standard horizontal pathing for Sectors 1 & 2
+            hud.innerText = "⚡ HYPER-DRIVE ENGAGED ⚡";
+            hud.style.color = "#00ff66";
+            hud.style.textShadow = "0 0 10px #00ff66";
+            
+            rocket.className = 'rocket-sprite rocket-horizontal';
+            rocket.style.animation = 'dynamicFlyHorizontal 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+            flame.className = 'active-fire';
+            flame.style.animation = 'engineThrottleHorizontal 3.5s linear infinite';
+        }
 
         setTimeout(() => {
             stage.style.display = 'none';
             flash.className = 'screen-flash';
             warp.className = 'warp-lines';
             rocket.className = 'rocket-sprite';
+            flame.className = '';
+            rocket.style.animation = '';
+            flame.style.animation = '';
             callback();
         }, 3500);
     }
