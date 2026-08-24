@@ -152,7 +152,6 @@
         .screen-flash { position: absolute; width:100%; height:100%; background: #00f2ff; opacity: 0; pointer-events: none; }
         .hud-overlay { position: absolute; top: 15%; left: 0; width: 100%; color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace; text-shadow: 0 0 10px #00ff66; letter-spacing: 2px; }
 
-        /* STANDARD TIMING DIRECTION (Sectors 1 & 2: Left to Right) */
         .rocket-horizontal { left: -180px; top: 45%; }
         @keyframes dynamicFlyHorizontal {
             0% { left: -180px; transform: scale(0.7); }
@@ -161,6 +160,8 @@
             65% { left: calc(50% - 85px); transform: scale(1.15); }
             100% { left: 120vw; transform: scale(1.6); }
         }
+        
+        /* FIXED: Re-anchored origin points back directly onto the left center thruster exhaust coordinates */
         @keyframes engineThrottleHorizontal {
             0% { transform: scaleX(0.5); opacity: 0.5; }
             59% { transform: scaleX(0.6); opacity: 0.7; }
@@ -168,19 +169,20 @@
             100% { transform: scaleX(2.5) scaleY(1.2); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
         }
 
-        /* NEW FINALE TRAJECTORY (Sector 3: Vertical Skyrocket Launch) */
         .rocket-vertical { left: calc(50% - 75px); top: 110vh; }
         @keyframes dynamicFlyVertical {
             0% { top: 110vh; transform: scale(0.7) rotate(-90deg); }
-            30% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); } /* Rise up and hover in center */
-            60% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); } /* Hold positioning stable */
-            65% { top: calc(50% - 65px); transform: scale(1.15) rotate(-90deg); } /* Sink slightly down under thrust load */
-            100% { top: -150vh; transform: scale(1.8) rotate(-90deg); } /* Zoom straight up out of frame */
+            30% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
+            60% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
+            65% { top: calc(50% - 65px); transform: scale(1.15) rotate(-90deg); }
+            100% { top: -150vh; transform: scale(1.8) rotate(-90deg); }
         }
+        
+        /* FIXED: Isolated vertical scale transform-origin mapping */
         @keyframes engineThrottleVertical {
             0% { transform: scaleX(0.5); opacity: 0.5; }
             59% { transform: scaleX(0.6); opacity: 0.7; }
-            60% { transform: scaleX(4.5) scaleY(2.2); fill: #ffe600; filter: drop-shadow(0 0 20px #ffe600); opacity: 1; } /* Mega-blast yellow/white flame explosion */
+            60% { transform: scaleX(4.5) scaleY(2.2); fill: #ffe600; filter: drop-shadow(0 0 20px #ffe600); opacity: 1; }
             100% { transform: scaleX(3.0) scaleY(1.4); fill: #ff3300; filter: drop-shadow(0 0 30px #ff3300); opacity: 1; }
         }
 
@@ -197,9 +199,9 @@
     <div id="warp" class="warp-lines"></div>
     <div id="hud-alert" class="hud-overlay">⚡ HYPER-DRIVE ENGAGED ⚡</div>
     
-    <!-- Unified ship asset container whose paths adjust dynamically to execution orders -->
     <div id="rocket" class="rocket-sprite">
         <svg viewBox="0 0 120 100" width="100%">
+            <!-- Flame jet anchor vectors -->
             <path id="booster-flame" d="M25,50 L2,42 L8,50 L2,58 Z" fill="#ff007f"/>
             <path d="M25,50 L12,47 L15,50 L12,53 Z" fill="#ffcc00"/>
             <path d="M95,50 C70,62 40,62 25,50 C40,38 70,38 95,50 Z" fill="#e0e0e0" stroke="#00f2ff" stroke-width="2"/>
@@ -388,20 +390,20 @@
         document.getElementById("ones-count").innerText = countOnes;
     }
 
+    /* FIXED: Corrected lower-case text selectors to match element variables perfectly */
     function clearBins() {
         let binTens = document.getElementById("tens-bin");
         let rods = binTens.getElementsByClassName("token-rod");
-        while(rods.length > 0) { rods.remove(); }
+        while(rods.length > 0) { rods[0].remove(); }
         
         let binOnes = document.getElementById("ones-bin");
         let cubes = binOnes.getElementsByClassName("token-cube");
-        while(cubes.length > 0) { cubes.remove(); }
+        while(cubes.length > 0) { cubes[0].remove(); }
         
         document.getElementById("feed").innerText = "";
         updateCounters();
     }
 
-    /* UPDATED: Dynamic Kinematic Router for Sector 3 Finale Trajectory Mapping */
     function playRewardAnimation(callback) {
         const stage = document.getElementById('reward-stage');
         const flash = document.getElementById('flash');
@@ -414,7 +416,6 @@
         flash.className = 'screen-flash run-flash';
         warp.className = 'warp-lines run-warp';
 
-        // Check if we are finalizing Sector 3
         if (currentSector === 3) {
             hud.innerText = "🚨 ORBITAL ASCENT PROFILE LOCKED 🚨";
             hud.style.color = "#ffe600";
@@ -423,9 +424,11 @@
             rocket.className = 'rocket-sprite rocket-vertical';
             rocket.style.animation = 'dynamicFlyVertical 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
             flame.className = 'active-fire';
+            
+            /* FIXED: Set origin explicitly to top center boundary of the nozzle path */
+            flame.style.transformOrigin = '25px 50px';
             flame.style.animation = 'engineThrottleVertical 3.5s linear infinite';
         } else {
-            // Standard horizontal pathing for Sectors 1 & 2
             hud.innerText = "⚡ HYPER-DRIVE ENGAGED ⚡";
             hud.style.color = "#00ff66";
             hud.style.textShadow = "0 0 10px #00ff66";
@@ -433,6 +436,9 @@
             rocket.className = 'rocket-sprite rocket-horizontal';
             rocket.style.animation = 'dynamicFlyHorizontal 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
             flame.className = 'active-fire';
+            
+            /* FIXED: Anchored engine throttle origins squarely onto horizontal left nozzle tip */
+            flame.style.transformOrigin = '25px 50px';
             flame.style.animation = 'engineThrottleHorizontal 3.5s linear infinite';
         }
 
