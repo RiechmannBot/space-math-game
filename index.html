@@ -374,21 +374,26 @@
         document.getElementById("ones-count").innerText = countOnes;
     }
 
+    /* REPAIRED: Safe, high-performance looping engine that flushes items one-by-one correctly */
     function clearBins() {
         let binTens = document.getElementById("tens-bin");
         let rods = binTens.getElementsByClassName("token-rod");
-        while(rods.length > 0) { rods.remove(); }
+        while(rods.length > 0) { 
+            rods[0].parentNode.removeChild(rods[0]); 
+        }
+        
         let binOnes = document.getElementById("ones-bin");
         let cubes = binOnes.getElementsByClassName("token-cube");
-        while(cubes.length > 0) { cubes.remove(); }
+        while(cubes.length > 0) { 
+            cubes[0].parentNode.removeChild(cubes[0]); 
+        }
+        
         document.getElementById("feed").innerText = "";
         updateCounters();
     }
 
     function startSmokeTrail() {
-        // Safe check: Only initialize loop generator if playing Level 3
         if (currentSector !== 3) return;
-
         const stage = document.getElementById('reward-stage');
         const rocket = document.getElementById('rocket');
         smokeInterval = setInterval(() => {
@@ -447,7 +452,7 @@
             flash.className = 'screen-flash';
             warp.className = 'warp-lines';
             let activeParticles = stage.getElementsByClassName('trail-particle');
-            while(activeParticles.length > 0) { activeParticles.remove(); }
+            while(activeParticles.length > 0) { activeParticles[0].parentNode.removeChild(activeParticles[0]); }
             rocket.className = 'rocket-sprite';
             flame.className = '';
             rocket.style.animation = '';
