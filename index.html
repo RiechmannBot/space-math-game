@@ -53,6 +53,8 @@
             border-radius: 12px;
             padding: 15px;
             box-shadow: inset 0 0 15px rgba(255, 0, 127, 0.2);
+            display: flex;
+            flex-direction: column;
         }
         .workspace {
             display: flex;
@@ -63,10 +65,16 @@
             background: rgba(26, 26, 58, 0.6);
             border: 1px solid #fff;
             border-radius: 10px;
-            padding: 10px;
+            padding: 15px;
             display: flex;
             justify-content: space-around;
             align-items: center;
+        }
+        .shelf-item-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px; /* Safe mobile clearance gap */
         }
         .bin-row {
             display: flex;
@@ -106,23 +114,23 @@
             font-weight: bold;
             margin-top: 5px;
         }
-        /* Draggable Token Designs */
         .token {
             cursor: grab;
             border: 1px solid #fff;
             border-radius: 4px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
             display: inline-block;
+            touch-action: none; /* Stabilizes mobile dragging registration */
         }
         .token:active { cursor: grabbing; }
         .token-rod {
-            width: 16px;
-            height: 65px;
+            width: 20px; /* Wider hit-box for fingers */
+            height: 70px;
             background: linear-gradient(#ffe600, #b3a200);
         }
         .token-cube {
-            width: 16px;
-            height: 16px;
+            width: 24px; /* Scaled up footprint for easy tapping/dragging */
+            height: 24px;
             background: linear-gradient(#00ff66, #00993d);
         }
         .math-terminal { 
@@ -138,7 +146,6 @@
         }
         button:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff007f; }
         
-        /* Reward Stage Setup */
         #reward-stage { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020208; z-index: 9999; }
         .warp-lines { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px); background-size: 100% 100%, 40px 100%; opacity: 0; }
         .rocket-sprite { position: absolute; left: -180px; top: 45%; width: 150px; }
@@ -198,32 +205,41 @@
         <h2 id="title" style="color: #00f2ff; margin: 0;">Sector 1</h2>
         
         <div class="grid-layout">
-            <!-- Left Side: Problem Card Terminal -->
+            <!-- Left Side: Problem Card Terminal with new step-by-step instructions briefing -->
             <div class="sidebar">
-                <p id="story" style="font-size: 13px; color: #ccc; min-height: 70px; text-align: left;"></p>
+                <div style="font-size: 11px; font-weight: bold; color: #ff007f; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px dashed rgba(255,0,127,0.4); padding-bottom: 4px;">Mission Protocol</div>
+                <div style="font-size: 12px; color: #aaa; text-align: left; margin: 8px 0; line-height: 1.4;">
+                    1. Solve the math card.<br>
+                    2. Drag fuel rods into bins to match your answer columns.<br>
+                    3. Click any inside item to erase it.<br>
+                    4. Fire engines when ready!
+                </div>
+                
+                <p id="story" style="font-size: 13px; color: #fff; min-height: 60px; text-align: left; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; margin-bottom: 0;"></p>
+                
                 <div class="math-terminal">
                     <div id="num1">0</div>
                     <div style="color: #ff007f;">-<span id="num2">0</span></div>
                 </div>
-                <div style="font-size: 12px; color: #00f2ff; margin-bottom: 10px;">👇 Use bins to make answer!</div>
-                <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px;">🗑️ Clear Bins</button>
+                
+                <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px; margin-top: auto;">🗑️ Reset Bins</button>
             </div>
 
-            <!-- Right Side: Interactive Drag Stations -->
+            <!-- Right Side: Interactive Drag Stations with outside structural labels -->
             <div class="workspace">
-                <!-- Supply Depot Shelf (Infinite Templates) -->
+                <!-- Labels are completely pulled out of the interactive block layer -->
                 <div class="supply-shelf">
-                    <div>
+                    <div class="shelf-item-wrapper">
+                        <div style="font-size: 13px; font-weight: bold; color:#ffe600; text-transform: uppercase;">[ Tens Fuel Rod ]</div>
                         <div id="source-rod" class="token token-rod" draggable="true" ondragstart="drag(event)"></div>
-                        <div style="font-size: 11px; margin-top:2px; color:#ffe600;">Drag Tens Rod</div>
                     </div>
-                    <div>
+                    <div class="shelf-item-wrapper">
+                        <div style="font-size: 13px; font-weight: bold; color:#00ff66; text-transform: uppercase;">[ Ones Fuel Cube ]</div>
                         <div id="source-cube" class="token token-cube" draggable="true" ondragstart="drag(event)"></div>
-                        <div style="font-size: 11px; margin-top:2px; color:#00ff66;">Drag Ones Cube</div>
                     </div>
                 </div>
 
-                <!-- Active Drop Targets boxes -->
+                <!-- Active Drop Boxes -->
                 <div class="bin-row">
                     <div id="tens-bin" class="collector-bin" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, 'tens')">
                         <div class="bin-label" style="color:#ffe600;">TENS COLLECTOR</div>
@@ -233,7 +249,7 @@
                     </div>
                 </div>
 
-                <!-- Digital Code Readout counters -->
+                <!-- Digital Value Counters -->
                 <div style="display: flex; justify-content: space-around;">
                     <div>Tens Code Value: <span id="tens-count" class="bin-counter" style="color:#ffe600;">0</span></div>
                     <div>Ones Code Value: <span id="ones-count" class="bin-counter" style="color:#00ff66;">0</span></div>
@@ -258,16 +274,15 @@
     let countTens = 0, countOnes = 0;
 
     const spaceStories = [
-        "A starship logs [A] cargo plasma canisters. Scrappers pull out [B] canisters using a tractor beam. How many hold containers are left?",
-        "Your matrix scans [A] core engine rods online. A sudden asteroid wall collision fries [B] rods completely. How many pins run?",
-        "The base base protective wall uses [A] magnetic shield layers. Alien laser beams drop [B] layers. How many layers still stay up?"
+        "A starship logs [A] cargo plasma canisters. Scrappers tractor-beam out [B] canisters. How many hold containers are left?",
+        "Your matrix scans [A] core engine rods online. A sudden asteroid collision fries [B] rods completely. How many pins run?",
+        "The base protective wall uses [A] magnetic shield layers. Alien laser beams drop [B] layers. How many layers still stay up?"
     ];
 
     function generateRandomProblem() {
         topNumber = Math.floor(Math.random() * 56) + 40; // 40 to 95
         let topOnes = topNumber % 10;
         
-        // Force regrouping mechanism (bottom ones value > top ones value)
         let bottomOnes = Math.floor(Math.random() * (9 - (topOnes + 1) + 1)) + (topOnes + 1);
         let bottomTens = Math.floor(Math.random() * (Math.floor(topNumber / 10) - 1)) + 1;
         
@@ -296,7 +311,6 @@
         clearBins();
     }
 
-    /* Native HTML Drag and Drop Engineering */
     function allowDrop(ev) {
         ev.preventDefault();
         ev.currentTarget.classList.add('drag-over');
@@ -315,7 +329,6 @@
         ev.currentTarget.classList.remove('drag-over');
         let id = ev.dataTransfer.getData("text");
         
-        // Ensure tokens match their valid targeted target bins
         if (id === "source-rod" && binType === "tens") {
             let clonedRod = document.createElement("div");
             clonedRod.className = "token token-rod";
@@ -330,8 +343,27 @@
         updateCounters();
     }
 
+    // Touch Support polyfill handler for primitive mobile device dragging simulation
+    document.getElementById("source-rod").addEventListener("touchstart", handleMobileTapThrustTens);
+    document.getElementById("source-cube").addEventListener("touchstart", handleMobileTapThrustOnes);
+
+    function handleMobileTapThrustTens(e) {
+        let clonedRod = document.createElement("div");
+        clonedRod.className = "token token-rod";
+        clonedRod.onclick = function() { this.remove(); updateCounters(); };
+        document.getElementById("tens-bin").appendChild(clonedRod);
+        updateCounters();
+    }
+
+    function handleMobileTapThrustOnes(e) {
+        let clonedCube = document.createElement("div");
+        clonedCube.className = "token token-cube";
+        clonedCube.onclick = function() { this.remove(); updateCounters(); };
+        document.getElementById("ones-bin").appendChild(clonedCube);
+        updateCounters();
+    }
+
     function updateCounters() {
-        // Count total nodes inside target boxes bypassing text label nodes
         countTens = document.getElementById("tens-bin").getElementsByClassName("token-rod").length;
         countOnes = document.getElementById("ones-bin").getElementsByClassName("token-cube").length;
         
@@ -340,11 +372,12 @@
     }
 
     function clearBins() {
-        // Remove dropped nodes while protecting structural box tags
-        let rods = document.getElementById("tens-bin").getElementsByClassName("token-rod");
+        let binTens = document.getElementById("tens-bin");
+        let rods = binTens.getElementsByClassName("token-rod");
         while(rods.length > 0) { rods[0].remove(); }
         
-        let cubes = document.getElementById("ones-bin").getElementsByClassName("token-cube");
+        let binOnes = document.getElementById("ones-bin");
+        let cubes = binOnes.getElementsByClassName("token-cube");
         while(cubes.length > 0) { cubes[0].remove(); }
         
         document.getElementById("feed").innerText = "";
@@ -368,7 +401,7 @@
             warp.className = 'warp-lines';
             rocket.className = 'rocket-sprite';
             callback();
-        }, 3500); // 3.5 seconds cinematic cycle run
+        }, 3500);
     }
 
     function verifyAnswer() {
