@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Rescue: Tactile Command Console</title>
     <style>
-        :root {
-            --flame-scale: 1;
-            --flame-thick: 1;
-        }
         @keyframes moveStars {
             from { background-position: 0 0; }
             to { background-position: 0 1000px; }
@@ -152,38 +148,36 @@
         
         #reward-stage { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020208; z-index: 9999; }
         .warp-lines { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px); background-size: 100% 100%, 40px 100%; opacity: 0; }
-        .rocket-sprite { position: absolute; width: 150px; z-index: 100; }
+        .rocket-sprite { position: absolute; width: 280px; z-index: 100; }
         .screen-flash { position: absolute; width:100%; height:100%; background: #00f2ff; opacity: 0; pointer-events: none; }
         .hud-overlay { position: absolute; top: 15%; left: 0; width: 100%; color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace; text-shadow: 0 0 10px #00ff66; letter-spacing: 2px; }
 
-        .rocket-horizontal { left: -180px; top: 45%; }
+        .rocket-horizontal { left: -300px; top: 45%; }
         @keyframes dynamicFlyHorizontal {
-            0% { left: -180px; transform: scale(0.7); }
-            30% { left: calc(50% - 75px); transform: scale(1.1); }
-            60% { left: calc(50% - 75px); transform: scale(1.1); }
-            65% { left: calc(50% - 85px); transform: scale(1.15); }
-            100% { left: 120vw; transform: scale(1.6); }
-        }
-        @keyframes engineThrottleHorizontal {
-            0% { transform: scaleX(calc(0.5 * var(--flame-scale, 1))); opacity: 0.5; }
-            59% { transform: scaleX(calc(0.6 * var(--flame-scale, 1))); opacity: 0.7; }
-            60% { transform: scaleX(calc(3.5 * var(--flame-scale, 1))) scaleY(calc(1.8 * var(--flame-thick, 1))); fill: #00f2ff; filter: drop-shadow(0 0 15px #00f2ff); opacity: 1; }
-            100% { transform: scaleX(calc(2.5 * var(--flame-scale, 1))) scaleY(calc(1.2 * var(--flame-thick, 1))); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
+            0% { left: -300px; transform: scale(0.7); }
+            30% { left: calc(50% - 140px); transform: scale(1.05); }
+            60% { left: calc(50% - 140px); transform: scale(1.05); }
+            65% { left: calc(50% - 155px); transform: scale(1.12); }
+            100% { left: 120vw; transform: scale(1.55); }
         }
 
-        .rocket-vertical { left: calc(50% - 75px); top: 110vh; }
+        .rocket-vertical { left: calc(50% - 140px); top: 110vh; }
         @keyframes dynamicFlyVertical {
             0% { top: 110vh; transform: scale(0.7) rotate(-90deg); }
-            30% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
-            60% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
-            65% { top: calc(50% - 65px); transform: scale(1.15) rotate(-90deg); }
-            100% { top: -150vh; transform: scale(1.8) rotate(-90deg); }
+            30% { top: calc(50% - 140px); transform: scale(1.05) rotate(-90deg); }
+            60% { top: calc(50% - 140px); transform: scale(1.05) rotate(-90deg); }
+            65% { top: calc(50% - 130px); transform: scale(1.12) rotate(-90deg); }
+            100% { top: -150vh; transform: scale(1.75) rotate(-90deg); }
         }
-        @keyframes engineThrottleVertical {
-            0% { transform: scaleX(calc(0.5 * var(--flame-scale, 1))); opacity: 0.5; }
-            59% { transform: scaleX(calc(0.6 * var(--flame-scale, 1))); opacity: 0.7; }
-            60% { transform: scaleX(calc(4.5 * var(--flame-scale, 1))) scaleY(calc(2.2 * var(--flame-thick, 1))); fill: #ffe600; filter: drop-shadow(0 0 20px #ffe600); opacity: 1; }
-            100% { transform: scaleX(calc(3.0 * var(--flame-scale, 1))) scaleY(calc(1.4 * var(--flame-thick, 1))); fill: #ff3300; filter: drop-shadow(0 0 30px #ff3300); opacity: 1; }
+
+        @keyframes flameFlicker {
+            0% { transform: scaleX(0.96) scaleY(0.96); opacity: 0.88; }
+            50% { transform: scaleX(1.05) scaleY(1.05); opacity: 1; filter: drop-shadow(0 0 12px currentColor); }
+            100% { transform: scaleX(0.96) scaleY(0.96); opacity: 0.88; }
+        }
+        .booster-group {
+            transform-origin: 210px 50px;
+            animation: flameFlicker 0.12s infinite alternate;
         }
 
         .trail-particle {
@@ -213,13 +207,22 @@
     <div id="warp" class="warp-lines"></div>
     <div id="hud-alert" class="hud-overlay">⚡ HYPER-DRIVE ENGAGED ⚡</div>
     <div id="rocket" class="rocket-sprite">
-        <svg viewBox="0 0 120 100" width="100%">
-            <path id="booster-flame" d="M25,50 L2,42 L8,50 L2,58 Z" fill="#ff007f"/>
-            <path d="M25,50 L12,47 L15,50 L12,53 Z" fill="#ffcc00"/>
-            <path d="M95,50 C70,62 40,62 25,50 C40,38 70,38 95,50 Z" fill="#e0e0e0" stroke="#00f2ff" stroke-width="2"/>
-            <path d="M45,39 L30,20 L35,39 Z" fill="#ff007f"/>
-            <path d="M45,61 L30,80 L35,61 Z" fill="#ff007f"/>
-            <circle cx="70" cy="50" r="7" fill="#00f2ff"/>
+        <svg viewBox="0 0 320 100" width="100%">
+            <!-- Thruster Flame Layer Group -->
+            <g class="booster-group">
+                <polygon id="flame-gold" points="" fill="#ffe600" opacity="0.9" style="display:none;"/>
+                <polygon id="flame-cyan" points="" fill="#00f2ff" opacity="0.95" style="display:none;"/>
+                <polygon id="flame-magenta" points="" fill="#ff007f" opacity="0.95"/>
+                <polygon id="flame-core" points="" fill="#ffe600" opacity="1"/>
+            </g>
+            
+            <!-- Dynamic Swept Wings -->
+            <polygon id="fin-top" points="238,38 216,18 224,38" fill="#ff007f"/>
+            <polygon id="fin-bot" points="238,62 216,82 224,62" fill="#ff007f"/>
+            
+            <!-- Rocket Hull & Cockpit -->
+            <path d="M280,50 C265,62 230,62 210,50 C230,38 265,38 280,50 Z" fill="#e0e0e0" stroke="#00f2ff" stroke-width="2.5"/>
+            <circle cx="255" cy="50" r="6" fill="#00f2ff" stroke="#ffffff" stroke-width="1.2"/>
         </svg>
     </div>
 </div>
@@ -307,7 +310,7 @@
                 correctSolution = topNumber + bottomNumber;
             } else {
                 topNumber = Math.floor(Math.random() * 8) + 3; // 3 to 10
-                bottomNumber = Math.floor(Math.random() * (topNumber - 1)) + 1; // 1 to (topNumber - 1)
+                bottomNumber = Math.floor(Math.random() * (topNumber - 1)) + 1;
                 currentOperator = "-";
                 correctSolution = topNumber - bottomNumber;
             }
@@ -483,6 +486,58 @@
         updateCounters();
     }
 
+    function updateShipVisuals(progress) {
+        const fx = 210;
+        const fy = 50;
+        
+        // Wing Sweep Back Progression
+        const tipX = 222 - (progress * 5.5);
+        const tipYTop = 18 - (progress * 1.2);
+        const tipYBot = 82 + (progress * 1.2);
+        
+        document.getElementById('fin-top').setAttribute('points', `238,38 ${tipX},${tipYTop} 224,38`);
+        document.getElementById('fin-bot').setAttribute('points', `238,62 ${tipX},${tipYBot} 224,62`);
+        
+        // Dynamic Flame Multi-Layer Scaling
+        const baseLen = 40 + (progress * 18);
+        
+        // Core Layer
+        const coreLen = baseLen * 0.4;
+        const coreH = 10 + (progress * 0.5);
+        document.getElementById('flame-core').setAttribute('points', 
+            `${fx},${fy} ${fx - coreLen},${fy - coreH} ${fx - (coreLen * 0.75)},${fy} ${fx - coreLen},${fy + coreH}`);
+        
+        // Magenta Layer
+        const magLen = baseLen * 0.7;
+        const magH = 16 + (progress * 0.7);
+        document.getElementById('flame-magenta').setAttribute('points', 
+            `${fx},${fy} ${fx - magLen},${fy - magH} ${fx - (magLen * 0.75)},${fy} ${fx - magLen},${fy + magH}`);
+        
+        // Cyan Jet Layer (Stage 2+)
+        const cyanElem = document.getElementById('flame-cyan');
+        if (progress >= 3) {
+            cyanElem.style.display = 'block';
+            const cyanLen = baseLen * 0.88;
+            const cyanH = 20 + (progress * 0.8);
+            cyanElem.setAttribute('points', 
+                `${fx},${fy} ${fx - cyanLen},${fy - cyanH} ${fx - (cyanLen * 0.75)},${fy} ${fx - cyanLen},${fy + cyanH}`);
+        } else {
+            cyanElem.style.display = 'none';
+        }
+        
+        // Solar Gold Overdrive Plume (Stage 3+)
+        const goldElem = document.getElementById('flame-gold');
+        if (progress >= 6) {
+            goldElem.style.display = 'block';
+            const goldLen = baseLen;
+            const goldH = 24 + (progress * 0.9);
+            goldElem.setAttribute('points', 
+                `${fx},${fy} ${fx - goldLen},${fy - goldH} ${fx - (goldLen * 0.75)},${fy} ${fx - goldLen},${fy + goldH}`);
+        } else {
+            goldElem.style.display = 'none';
+        }
+    }
+
     function startSmokeTrail() {
         if (currentSector !== 3) return;
         const stage = document.getElementById('reward-stage');
@@ -508,15 +563,10 @@
         const flash = document.getElementById('flash');
         const warp = document.getElementById('warp');
         const rocket = document.getElementById('rocket');
-        const flame = document.getElementById('booster-flame');
         const hud = document.getElementById('hud-alert');
 
-        // Dynamic Flame Scaling based on total completed sectors (1 to 9)
-        let totalCompletedIndex = ((currentStage - 1) * 3) + currentSector;
-        let flameScale = 1 + (totalCompletedIndex * 0.32);
-        let flameThick = 1 + (totalCompletedIndex * 0.08);
-        document.documentElement.style.setProperty('--flame-scale', flameScale);
-        document.documentElement.style.setProperty('--flame-thick', flameThick);
+        let totalProgressIndex = ((currentStage - 1) * 3) + currentSector;
+        updateShipVisuals(totalProgressIndex);
 
         stage.style.display = 'block';
         flash.className = 'screen-flash run-flash';
@@ -528,18 +578,12 @@
             hud.style.textShadow = "0 0 10px #ffe600";
             rocket.className = 'rocket-sprite rocket-vertical';
             rocket.style.animation = 'dynamicFlyVertical 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
-            flame.className = 'active-fire';
-            flame.style.transformOrigin = '25px 50px';
-            flame.style.animation = 'engineThrottleVertical 3.5s linear infinite';
         } else {
             hud.innerText = "⚡ HYPER-DRIVE ENGAGED ⚡";
             hud.style.color = "#00ff66";
             hud.style.textShadow = "0 0 10px #00ff66";
             rocket.className = 'rocket-sprite rocket-horizontal';
             rocket.style.animation = 'dynamicFlyHorizontal 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
-            flame.className = 'active-fire';
-            flame.style.transformOrigin = '25px 50px';
-            flame.style.animation = 'engineThrottleHorizontal 3.5s linear infinite';
         }
 
         startSmokeTrail();
@@ -552,9 +596,7 @@
             let activeParticles = stage.getElementsByClassName('trail-particle');
             while(activeParticles.length > 0) { activeParticles[0].parentNode.removeChild(activeParticles[0]); }
             rocket.className = 'rocket-sprite';
-            flame.className = '';
             rocket.style.animation = '';
-            flame.style.animation = '';
             callback();
         }, 3500);
     }
@@ -593,8 +635,6 @@
     }
 
     function resetGame() {
-        document.documentElement.style.setProperty('--flame-scale', 1);
-        document.documentElement.style.setProperty('--flame-thick', 1);
         document.getElementById('v3').style.display = 'none';
         document.getElementById('v2').style.display = 'none';
         document.getElementById('v1').style.display = 'block';
