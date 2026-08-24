@@ -74,7 +74,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px; /* Safe mobile clearance gap */
+            gap: 8px;
         }
         .bin-row {
             display: flex;
@@ -120,16 +120,16 @@
             border-radius: 4px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
             display: inline-block;
-            touch-action: none; /* Stabilizes mobile dragging registration */
+            touch-action: none;
         }
         .token:active { cursor: grabbing; }
         .token-rod {
-            width: 20px; /* Wider hit-box for fingers */
+            width: 20px;
             height: 70px;
             background: linear-gradient(#ffe600, #b3a200);
         }
         .token-cube {
-            width: 24px; /* Scaled up footprint for easy tapping/dragging */
+            width: 24px;
             height: 24px;
             background: linear-gradient(#00ff66, #00993d);
         }
@@ -149,7 +149,10 @@
         #reward-stage { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020208; z-index: 9999; }
         .warp-lines { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px); background-size: 100% 100%, 40px 100%; opacity: 0; }
         .rocket-sprite { position: absolute; left: -180px; top: 45%; width: 150px; }
-        .screen-flash { position: absolute; width:100%; height:100%; background: white; opacity: 0; pointer-events: none; }
+        
+        /* FIXED: Soft energy flash overlay (subtle 0.25 max opacity so it doesn't mask the rocket) */
+        .screen-flash { position: absolute; width:100%; height:100%; background: #00f2ff; opacity: 0; pointer-events: none; }
+        
         .hud-overlay { position: absolute; top: 15%; left: 0; width: 100%; color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace; text-shadow: 0 0 10px #00ff66; letter-spacing: 2px; }
 
         @keyframes dynamicFly {
@@ -166,7 +169,9 @@
             100% { transform: scaleX(2.5) scaleY(1.2); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
         }
         @keyframes warpDrive { 0% { opacity: 0; background-size: 100% 100%, 10px 100%; } 60% { opacity: 0.3; } 100% { opacity: 1; background-size: 100% 100%, 800px 100%; } }
-        @keyframes flashTrigger { 0% { opacity:0; } 60% { opacity:0; } 65% { opacity:1; } 100% { opacity:0; } }
+        
+        /* FIXED: Toned down flash intensity and synchronized perfectly with launch window acceleration */
+        @keyframes flashTrigger { 0% { opacity:0; } 60% { opacity:0; } 62% { opacity:0.25; background:#fff; } 65% { opacity:0.15; background:#00f2ff; } 100% { opacity:0; } }
 
         .run-warp { animation: warpDrive 3.5s cubic-bezier(0.1, 0.8, 0.1, 1) forwards; }
         .run-rocket { animation: dynamicFly 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
@@ -205,7 +210,7 @@
         <h2 id="title" style="color: #00f2ff; margin: 0;">Sector 1</h2>
         
         <div class="grid-layout">
-            <!-- Left Side: Problem Card Terminal with new step-by-step instructions briefing -->
+            <!-- Left Side: Problem Card Terminal -->
             <div class="sidebar">
                 <div style="font-size: 11px; font-weight: bold; color: #ff007f; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px dashed rgba(255,0,127,0.4); padding-bottom: 4px;">Mission Protocol</div>
                 <div style="font-size: 12px; color: #aaa; text-align: left; margin: 8px 0; line-height: 1.4;">
@@ -225,9 +230,8 @@
                 <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px; margin-top: auto;">🗑️ Reset Bins</button>
             </div>
 
-            <!-- Right Side: Interactive Drag Stations with outside structural labels -->
+            <!-- Right Side: Interactive Drag Stations -->
             <div class="workspace">
-                <!-- Labels are completely pulled out of the interactive block layer -->
                 <div class="supply-shelf">
                     <div class="shelf-item-wrapper">
                         <div style="font-size: 13px; font-weight: bold; color:#ffe600; text-transform: uppercase;">[ Tens Fuel Rod ]</div>
@@ -239,7 +243,7 @@
                     </div>
                 </div>
 
-                <!-- Active Drop Boxes -->
+                <!-- Drop Targets -->
                 <div class="bin-row">
                     <div id="tens-bin" class="collector-bin" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, 'tens')">
                         <div class="bin-label" style="color:#ffe600;">TENS COLLECTOR</div>
@@ -249,7 +253,7 @@
                     </div>
                 </div>
 
-                <!-- Digital Value Counters -->
+                <!-- Value Counters -->
                 <div style="display: flex; justify-content: space-around;">
                     <div>Tens Code Value: <span id="tens-count" class="bin-counter" style="color:#ffe600;">0</span></div>
                     <div>Ones Code Value: <span id="ones-count" class="bin-counter" style="color:#00ff66;">0</span></div>
@@ -261,7 +265,7 @@
         <button onclick="verifyAnswer()" style="width: 90%; background: linear-gradient(135deg, #00f2ff, #0077ff); box-shadow: 0 4px 15px rgba(0, 242, 255, 0.4);">ENGAGE FLIGHT SEQUENCE USING LIVE PIN CODES</button>
     </div>
 
-    <!-- VIEW 3: GAME COMPLETE WINNER SCREEN -->
+    <!-- VIEW 3: WIN SCREEN -->
     <div id="v3" class="view-pane" style="display: none;">
         <h1 style="color: #00ff66;">🏆 Mission Accomplished!</h1>
         <p>Excellent calculation work, Captain! All target sectors are cleared and your math matrix is online.</p>
@@ -274,9 +278,9 @@
     let countTens = 0, countOnes = 0;
 
     const spaceStories = [
-        "A starship logs [A] cargo plasma canisters. Scrappers tractor-beam out [B] canisters. How many hold containers are left?",
-        "Your matrix scans [A] core engine rods online. A sudden asteroid collision fries [B] rods completely. How many pins run?",
-        "The base protective wall uses [A] magnetic shield layers. Alien laser beams drop [B] layers. How many layers still stay up?"
+        "A starship logs [A] cargo plasma canisters. Scrappers tractor-beam out [B] canisters. How many containers are left?",
+        "Your matrix scans [A] core engine rods online. An asteroid collision fries [B] rods completely. How many pins still run?",
+        "The base protective wall uses [A] magnetic shield layers. Alien laser beams drop [B] layers. How many layers stay up?"
     ];
 
     function generateRandomProblem() {
@@ -343,7 +347,6 @@
         updateCounters();
     }
 
-    // Touch Support polyfill handler for primitive mobile device dragging simulation
     document.getElementById("source-rod").addEventListener("touchstart", handleMobileTapThrustTens);
     document.getElementById("source-cube").addEventListener("touchstart", handleMobileTapThrustOnes);
 
@@ -374,11 +377,11 @@
     function clearBins() {
         let binTens = document.getElementById("tens-bin");
         let rods = binTens.getElementsByClassName("token-rod");
-        while(rods.length > 0) { rods[0].remove(); }
+        while(rods.length > 0) { rods.remove(); }
         
         let binOnes = document.getElementById("ones-bin");
         let cubes = binOnes.getElementsByClassName("token-cube");
-        while(cubes.length > 0) { cubes[0].remove(); }
+        while(cubes.length > 0) { cubes.remove(); }
         
         document.getElementById("feed").innerText = "";
         updateCounters();
