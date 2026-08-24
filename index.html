@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Subtraction Rescue: Infinite Edition</title>
+    <title>Space Rescue: Tactile Command Console</title>
     <style>
         @keyframes moveStars {
             from { background-position: 0 0; }
@@ -19,19 +19,19 @@
             color: white; 
             font-family: 'Segoe UI', system-ui, sans-serif; 
             text-align: center; 
-            padding: 20px;
+            padding: 10px;
             margin: 0;
-            min-height: 95vh;
+            min-height: 98vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            user-select: none;
         }
-        .box { 
-            max-width: 500px; 
+        .console-frame { 
+            max-width: 800px; 
             width: 100%;
-            margin: auto; 
-            padding: 30px; 
+            padding: 20px; 
             border: 3px solid #00f2ff; 
             border-radius: 20px; 
             background: rgba(11, 11, 30, 0.95); 
@@ -41,71 +41,130 @@
             z-index: 10;
         }
         .view-pane { display: none; }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .sidebar {
+            background: #000;
+            border: 2px solid #ff007f;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: inset 0 0 15px rgba(255, 0, 127, 0.2);
+        }
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .supply-shelf {
+            background: rgba(26, 26, 58, 0.6);
+            border: 1px solid #fff;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .bin-row {
+            display: flex;
+            gap: 15px;
+            height: 180px;
+        }
+        .collector-bin {
+            flex: 1;
+            background: #111133;
+            border: 2px dashed #00f2ff;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-content: flex-start;
+            justify-content: center;
+            overflow-y: auto;
+            position: relative;
+            transition: background 0.2s;
+        }
+        .collector-bin.drag-over {
+            background: rgba(0, 242, 255, 0.2);
+        }
+        .bin-label {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+        .bin-counter {
+            font-size: 18px;
+            font-family: monospace;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        /* Draggable Token Designs */
+        .token {
+            cursor: grab;
+            border: 1px solid #fff;
+            border-radius: 4px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            display: inline-block;
+        }
+        .token:active { cursor: grabbing; }
+        .token-rod {
+            width: 16px;
+            height: 65px;
+            background: linear-gradient(#ffe600, #b3a200);
+        }
+        .token-cube {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(#00ff66, #00993d);
+        }
+        .math-terminal { 
+            font-size: 40px; font-family: monospace; font-weight: bold; background: #000; 
+            padding: 10px; border-radius: 8px; text-align: right; border-bottom: 4px solid white;
+            letter-spacing: 4px; width: 140px; margin: 15px auto;
+        }
         button { 
             background: linear-gradient(135deg, #ff007f, #b30059); 
-            color: white; border: none; padding: 14px 28px; font-size: 18px; 
-            font-weight: bold; border-radius: 50px; cursor: pointer; margin: 15px; 
+            color: white; border: none; padding: 12px 24px; font-size: 16px; 
+            font-weight: bold; border-radius: 50px; cursor: pointer; margin: 5px; 
             box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4); transition: transform 0.2s;
         }
         button:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff007f; }
-        .math { 
-            font-size: 44px; font-family: monospace; font-weight: bold; background: #000; 
-            padding: 20px; width: 160px; margin: 25px auto; text-align: right; border-radius: 10px;
-            border: 2px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 15px rgba(0,252,255,0.2); letter-spacing: 4px;
-        }
-        .line { border-bottom: 4px solid white; margin: 8px 0; }
-        input { font-size: 34px; width: 90px; text-align: center; background: #111; color: #00f2ff; border: 2px dashed #ff007f; border-radius: 8px; }
-        .block-container { display: flex; justify-content: center; gap: 40px; margin: 25px 0; }
-        .block-label { font-size: 14px; color: #00f2ff; margin-bottom: 8px; }
-        .rod { width: 14px; height: 65px; background: linear-gradient(#ffe600, #b3a200); border: 1px solid #fff; display: inline-block; margin: 3px; border-radius: 3px; }
-        .cube { width: 14px; height: 14px; background: linear-gradient(#00ff66, #00993d); border: 1px solid #fff; display: inline-block; margin: 3px; border-radius: 3px; }
-        #feed { font-size: 18px; font-weight: bold; min-height: 24px; }
         
-        #reward-stage {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #020208;
-            z-index: 9999;
-        }
-        .warp-lines {
-            position: absolute; width: 100%; height: 100%;
-            background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 100%;
-            opacity: 0;
-        }
-        .rocket-sprite { position: absolute; left: -150px; top: 45%; width: 150px; }
+        /* Reward Stage Setup */
+        #reward-stage { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020208; z-index: 9999; }
+        .warp-lines { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px); background-size: 100% 100%, 40px 100%; opacity: 0; }
+        .rocket-sprite { position: absolute; left: -180px; top: 45%; width: 150px; }
         .screen-flash { position: absolute; width:100%; height:100%; background: white; opacity: 0; pointer-events: none; }
-        .hud-overlay {
-            position: absolute; top: 15%; left: 0; width: 100%;
-            color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace;
-            text-shadow: 0 0 10px #00ff66; letter-spacing: 2px;
-        }
+        .hud-overlay { position: absolute; top: 15%; left: 0; width: 100%; color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace; text-shadow: 0 0 10px #00ff66; letter-spacing: 2px; }
 
-        /* Cinematic Move-Stop-Zoom Timing Sequence */
         @keyframes dynamicFly {
             0% { left: -180px; transform: scale(0.7); }
-            30% { left: calc(50% - 75px); transform: scale(1.1); } /* Stop & hover in center */
-            60% { left: calc(50% - 75px); transform: scale(1.1); } /* Hold positioning */
-            65% { left: calc(50% - 85px); transform: scale(1.15); } /* Subtle cockpit pull back */
-            100% { left: 120vw; transform: scale(1.6); } /* Mach launch off right screen */
+            30% { left: calc(50% - 75px); transform: scale(1.1); }
+            60% { left: calc(50% - 75px); transform: scale(1.1); }
+            65% { left: calc(50% - 85px); transform: scale(1.15); }
+            100% { left: 120vw; transform: scale(1.6); }
         }
-
-        /* Supercharged Engine Flame Thrust Scale Sequence */
         @keyframes engineThrottle {
             0% { transform: scaleX(0.5); opacity: 0.5; }
             59% { transform: scaleX(0.6); opacity: 0.7; }
-            60% { transform: scaleX(3.5) scaleY(1.8); fill: #00f2ff; filter: drop-shadow(0 0 15px #00f2ff); opacity: 1; } /* Flame explodes outward */
+            60% { transform: scaleX(3.5) scaleY(1.8); fill: #00f2ff; filter: drop-shadow(0 0 15px #00f2ff); opacity: 1; }
             100% { transform: scaleX(2.5) scaleY(1.2); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
         }
-
         @keyframes warpDrive { 0% { opacity: 0; background-size: 100% 100%, 10px 100%; } 60% { opacity: 0.3; } 100% { opacity: 1; background-size: 100% 100%, 800px 100%; } }
         @keyframes flashTrigger { 0% { opacity:0; } 60% { opacity:0; } 65% { opacity:1; } 100% { opacity:0; } }
 
         .run-warp { animation: warpDrive 3.5s cubic-bezier(0.1, 0.8, 0.1, 1) forwards; }
         .run-rocket { animation: dynamicFly 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         .run-flash { animation: flashTrigger 3.5s ease-out forwards; }
-        .active-fire { animation: engineThrottle 3.5s linear infinite; transform-origin: right center; }
+        .active-fire { animation: engineThrottle 3.5s linear infinite; transform-origin: left center; }
     </style>
 </head>
 <body>
@@ -115,7 +174,6 @@
     <div class="hud-overlay">⚡ HYPER-DRIVE ENGAGED ⚡</div>
     <div id="rocket" class="rocket-sprite">
         <svg viewBox="0 0 120 100" width="100%">
-            <!-- Flame jet linked directly to the new throttle physics -->
             <path id="booster-flame" class="active-fire" d="M25,50 L2,42 L8,50 L2,58 Z" fill="#ff007f"/>
             <path d="M25,50 L12,47 L15,50 L12,53 Z" fill="#ffcc00"/>
             <path d="M95,50 C70,62 40,62 25,50 C40,38 70,38 95,50 Z" fill="#e0e0e0" stroke="#00f2ff" stroke-width="2"/>
@@ -126,58 +184,90 @@
     </div>
 </div>
 
-<div class="box">
+<div class="console-frame">
+    <!-- VIEW 1: INTRO MENU -->
     <div id="v1" class="view-pane" style="display: block;">
-        <h1>🚀 Space Rescue</h1>
-        <p>Alien Scrappers stole our fleet's power crystals! Calculate the random math codes to jump your fleet safely to hyperspace.</p>
-        <button onclick="startGame()">Launch Mission</button>
+        <h1>🚀 Space Rescue Academy</h1>
+        <p>Alien Scrappers stole our fleet's power crystals! Let's initialize target collectors using dynamic fuel pins.</p>
+        <p><strong>How to build answers:</strong> Drag Tens Rods and Ones Cubes from the shelf and drop them into the target collectors!</p>
+        <button onclick="startGame()">Launch Command Console</button>
     </div>
 
+    <!-- VIEW 2: TACTICAL WORKSPACE -->
     <div id="v2" class="view-pane" style="display: none;">
-        <h2 id="title" style="color: #00f2ff; margin-bottom: 5px;">Sector 1</h2>
-        <p id="story" style="font-size: 14px; margin-top: 0; min-height: 40px; color: #ccc;"></p>
-        <div class="block-container">
-            <div><div class="block-label">Tens (10s)</div><div id="t-area"></div></div>
-            <div><div class="block-label">Ones (1s)</div><div id="o-area"></div></div>
+        <h2 id="title" style="color: #00f2ff; margin: 0;">Sector 1</h2>
+        
+        <div class="grid-layout">
+            <!-- Left Side: Problem Card Terminal -->
+            <div class="sidebar">
+                <p id="story" style="font-size: 13px; color: #ccc; min-height: 70px; text-align: left;"></p>
+                <div class="math-terminal">
+                    <div id="num1">0</div>
+                    <div style="color: #ff007f;">-<span id="num2">0</span></div>
+                </div>
+                <div style="font-size: 12px; color: #00f2ff; margin-bottom: 10px;">👇 Use bins to make answer!</div>
+                <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px;">🗑️ Clear Bins</button>
+            </div>
+
+            <!-- Right Side: Interactive Drag Stations -->
+            <div class="workspace">
+                <!-- Supply Depot Shelf (Infinite Templates) -->
+                <div class="supply-shelf">
+                    <div>
+                        <div id="source-rod" class="token token-rod" draggable="true" ondragstart="drag(event)"></div>
+                        <div style="font-size: 11px; margin-top:2px; color:#ffe600;">Drag Tens Rod</div>
+                    </div>
+                    <div>
+                        <div id="source-cube" class="token token-cube" draggable="true" ondragstart="drag(event)"></div>
+                        <div style="font-size: 11px; margin-top:2px; color:#00ff66;">Drag Ones Cube</div>
+                    </div>
+                </div>
+
+                <!-- Active Drop Targets boxes -->
+                <div class="bin-row">
+                    <div id="tens-bin" class="collector-bin" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, 'tens')">
+                        <div class="bin-label" style="color:#ffe600;">TENS COLLECTOR</div>
+                    </div>
+                    <div id="ones-bin" class="collector-bin" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, 'ones')">
+                        <div class="bin-label" style="color:#00ff66;">ONES COLLECTOR</div>
+                    </div>
+                </div>
+
+                <!-- Digital Code Readout counters -->
+                <div style="display: flex; justify-content: space-around;">
+                    <div>Tens Code Value: <span id="tens-count" class="bin-counter" style="color:#ffe600;">0</span></div>
+                    <div>Ones Code Value: <span id="ones-count" class="bin-counter" style="color:#00ff66;">0</span></div>
+                </div>
+            </div>
         </div>
-        <button id="trade-btn" onclick="tradeTen()" style="background: linear-gradient(135deg, #ffcc00, #cc9900); color: black; font-size: 14px; padding: 8px 18px;">🔄 Trade 1 Ten for 10 Ones</button>
-        <div class="math">
-            <div id="num1">0</div>
-            <div>-<span id="num2">0</span></div>
-            <div class="line"></div>
-            <input type="number" id="ans" placeholder="??">
-        </div>
-        <p id="feed"></p>
-        <button onclick="verifyAnswer()" style="box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3); background: linear-gradient(135deg, #00f2ff, #00a2ff);">Submit Core Code</button>
+
+        <p id="feed" style="margin: 10px 0; min-height: 24px;"></p>
+        <button onclick="verifyAnswer()" style="width: 90%; background: linear-gradient(135deg, #00f2ff, #0077ff); box-shadow: 0 4px 15px rgba(0, 242, 255, 0.4);">ENGAGE FLIGHT SEQUENCE USING LIVE PIN CODES</button>
     </div>
 
+    <!-- VIEW 3: GAME COMPLETE WINNER SCREEN -->
     <div id="v3" class="view-pane" style="display: none;">
-        <h1>🏆 Fleet Saved!</h1>
-        <p>The galaxy is completely safe! Infinite configuration master path unlocked.</p>
-        <button onclick="resetGame()">Play Academy Again</button>
+        <h1 style="color: #00ff66;">🏆 Mission Accomplished!</h1>
+        <p>Excellent calculation work, Captain! All target sectors are cleared and your math matrix is online.</p>
+        <button onclick="resetGame()">Restart Mission Base</button>
     </div>
 </div>
 <script>
     let currentSector = 1;
-    let topNumber = 0;
-    let bottomNumber = 0;
-    let correctSolution = 0;
-    let tens = 0, ones = 0, doneTrade = false;
+    let topNumber = 0, bottomNumber = 0, correctSolution = 0;
+    let countTens = 0, countOnes = 0;
 
-    // Dynamic story template database
     const spaceStories = [
-        "A fleet scout vessel logs [A] cargo battery pods. Space marauders extract [B] pods. How many remain?",
-        "Your engine panel monitors [A] ignition pins. A heavy cosmic ray bursts [B] pins offline. How many still fire?",
-        "An enemy defense grid deploys [A] force shield zones. Your lasers systematically shatter [B] zones. How many zones hold?"
+        "A starship logs [A] cargo plasma canisters. Scrappers pull out [B] canisters using a tractor beam. How many hold containers are left?",
+        "Your matrix scans [A] core engine rods online. A sudden asteroid wall collision fries [B] rods completely. How many pins run?",
+        "The base base protective wall uses [A] magnetic shield layers. Alien laser beams drop [B] layers. How many layers still stay up?"
     ];
 
     function generateRandomProblem() {
-        // Generate a random double-digit top number between 40 and 95
-        topNumber = Math.floor(Math.random() * 56) + 40;
-        
+        topNumber = Math.floor(Math.random() * 56) + 40; // 40 to 95
         let topOnes = topNumber % 10;
         
-        // Force regrouping configuration by ensuring bottom ones place value is larger than top ones place value
+        // Force regrouping mechanism (bottom ones value > top ones value)
         let bottomOnes = Math.floor(Math.random() * (9 - (topOnes + 1) + 1)) + (topOnes + 1);
         let bottomTens = Math.floor(Math.random() * (Math.floor(topNumber / 10) - 1)) + 1;
         
@@ -195,40 +285,70 @@
 
     function loadMission() {
         generateRandomProblem();
+        document.getElementById("title").innerText = "Sector " + currentSector + ": Navigation Node";
         
-        document.getElementById("title").innerText = "Sector " + currentSector + ": Deep Reconnaissance";
-        
-        // Inject randomized values directly into the active story text
-        let randomStoryText = spaceStories[(currentSector - 1) % spaceStories.length];
-        randomStoryText = randomStoryText.replace("[A]", topNumber).replace("[B]", bottomNumber);
-        document.getElementById("story").innerText = randomStoryText;
+        let storyStr = spaceStories[(currentSector - 1) % spaceStories.length];
+        document.getElementById("story").innerText = storyStr.replace("[A]", topNumber).replace("[B]", bottomNumber);
         
         document.getElementById("num1").innerText = topNumber;
         document.getElementById("num2").innerText = bottomNumber;
-        document.getElementById("ans").value = "";
-        document.getElementById("feed").innerText = "";
-        document.getElementById("trade-btn").style.display = "inline-block";
         
-        tens = Math.floor(topNumber / 10); 
-        ones = topNumber % 10; 
-        doneTrade = false;
-        draw();
+        clearBins();
     }
 
-    function draw() {
-        let ta = document.getElementById("t-area"), oa = document.getElementById("o-area");
-        ta.innerHTML = ""; oa.innerHTML = "";
-        for(let i=0; i<tens; i++) ta.innerHTML += '<div class="rod"></div>';
-        for(let i=0; i<ones; i++) oa.innerHTML += '<div class="cube"></div>';
+    /* Native HTML Drag and Drop Engineering */
+    function allowDrop(ev) {
+        ev.preventDefault();
+        ev.currentTarget.classList.add('drag-over');
     }
 
-    function tradeTen() {
-        if(tens > 0 && !doneTrade) {
-            tens--; ones += 10; doneTrade = true;
-            document.getElementById("trade-btn").style.display = "none";
-            draw();
-            let f = document.getElementById("feed"); f.style.color = "#00ff66"; f.innerText = "⚡ ENERGY SURGE! 1 Ten split into 10 Ones!";
+    function leaveDrop(ev) {
+        ev.currentTarget.classList.remove('drag-over');
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function drop(ev, binType) {
+        ev.preventDefault();
+        ev.currentTarget.classList.remove('drag-over');
+        let id = ev.dataTransfer.getData("text");
+        
+        // Ensure tokens match their valid targeted target bins
+        if (id === "source-rod" && binType === "tens") {
+            let clonedRod = document.createElement("div");
+            clonedRod.className = "token token-rod";
+            clonedRod.onclick = function() { this.remove(); updateCounters(); };
+            document.getElementById("tens-bin").appendChild(clonedRod);
+        } else if (id === "source-cube" && binType === "ones") {
+            let clonedCube = document.createElement("div");
+            clonedCube.className = "token token-cube";
+            clonedCube.onclick = function() { this.remove(); updateCounters(); };
+            document.getElementById("ones-bin").appendChild(clonedCube);
         }
+        updateCounters();
+    }
+
+    function updateCounters() {
+        // Count total nodes inside target boxes bypassing text label nodes
+        countTens = document.getElementById("tens-bin").getElementsByClassName("token-rod").length;
+        countOnes = document.getElementById("ones-bin").getElementsByClassName("token-cube").length;
+        
+        document.getElementById("tens-count").innerText = countTens;
+        document.getElementById("ones-count").innerText = countOnes;
+    }
+
+    function clearBins() {
+        // Remove dropped nodes while protecting structural box tags
+        let rods = document.getElementById("tens-bin").getElementsByClassName("token-rod");
+        while(rods.length > 0) { rods[0].remove(); }
+        
+        let cubes = document.getElementById("ones-bin").getElementsByClassName("token-cube");
+        while(cubes.length > 0) { cubes[0].remove(); }
+        
+        document.getElementById("feed").innerText = "";
+        updateCounters();
     }
 
     function playRewardAnimation(callback) {
@@ -242,23 +362,29 @@
         warp.className = 'warp-lines run-warp';
         rocket.className = 'rocket-sprite run-rocket';
 
-        // Keep stage alive slightly longer (3.5s) to allow for hover and blast phase
         setTimeout(() => {
             stage.style.display = 'none';
             flash.className = 'screen-flash';
             warp.className = 'warp-lines';
             rocket.className = 'rocket-sprite';
             callback();
-        }, 3500);
+        }, 3500); // 3.5 seconds cinematic cycle run
     }
 
     function verifyAnswer() {
-        let input = parseInt(document.getElementById("ans").value);
+        let finalSubmittedValue = (countTens * 10) + countOnes;
         let f = document.getElementById("feed");
-        if(isNaN(input)) { f.style.color = "#ff3333"; f.innerText = "⚠️ Input a numerical navigation code."; return; }
 
-        if(input === correctSolution) {
-            f.style.color = "#00ff66"; f.innerText = "🎯 COORDINATES LOCKED! Preparing jump...";
+        if (finalSubmittedValue === 0) {
+            f.style.color = "#ff3333";
+            f.innerText = "⚠️ Terminal empty! Drag pins into the containers to calibrate code values.";
+            return;
+        }
+
+        if (finalSubmittedValue === correctSolution) {
+            f.style.color = "#00ff66"; 
+            f.innerText = "🎯 PIN CONFIGURATION ACCEPTED! Initializing warp thrust sequence...";
+            
             setTimeout(() => {
                 playRewardAnimation(() => {
                     currentSector++;
@@ -268,7 +394,7 @@
             }, 800);
         } else {
             f.style.color = "#ff3333";
-            f.innerText = !doneTrade ? "❌ Shield failure! Try trading 1 Ten next door to get more Ones cubes!" : "❌ Recalibrating coordinates... Try counting the cubes again!";
+            f.innerText = "❌ Code error! " + countTens + " tens and " + countOnes + " ones makes " + finalSubmittedValue + ". Recalibrate and try again!";
         }
     }
 
