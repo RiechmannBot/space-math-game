@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Subtraction Rescue</title>
+    <title>Space Subtraction Rescue: Infinite Edition</title>
     <style>
         @keyframes moveStars {
             from { background-position: 0 0; }
@@ -60,6 +60,7 @@
         .rod { width: 14px; height: 65px; background: linear-gradient(#ffe600, #b3a200); border: 1px solid #fff; display: inline-block; margin: 3px; border-radius: 3px; }
         .cube { width: 14px; height: 14px; background: linear-gradient(#00ff66, #00993d); border: 1px solid #fff; display: inline-block; margin: 3px; border-radius: 3px; }
         #feed { font-size: 18px; font-weight: bold; min-height: 24px; }
+        
         #reward-stage {
             display: none;
             position: fixed;
@@ -73,42 +74,65 @@
             background-size: 100% 100%, 40px 100%;
             opacity: 0;
         }
-        .rocket-sprite { position: absolute; left: -150px; top: 45%; width: 120px; }
+        .rocket-sprite { position: absolute; left: -150px; top: 45%; width: 150px; }
         .screen-flash { position: absolute; width:100%; height:100%; background: white; opacity: 0; pointer-events: none; }
         .hud-overlay {
             position: absolute; top: 15%; left: 0; width: 100%;
             color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace;
             text-shadow: 0 0 10px #00ff66; letter-spacing: 2px;
         }
-        @keyframes warpDrive { 0% { opacity: 0; background-size: 100% 100%, 10px 100%; } 20% { opacity: 1; } 80% { opacity: 1; background-size: 100% 100%, 600px 100%; } 100% { opacity: 0; } }
-        @keyframes blastAcross { 0% { left: -150px; transform: scale(0.6) rotate(15deg); } 30% { left: 30%; transform: scale(1) rotate(0deg); } 60% { left: 45%; transform: scale(1.1) rotate(-2deg); } 75% { left: 50%; transform: scale(1) rotate(0deg); } 100% { left: 120vw; transform: scale(1.8) rotate(5deg); } }
-        @keyframes flashTrigger { 0% { opacity:0; } 10% { opacity:1; } 100% { opacity:0; } }
+
+        /* Cinematic Move-Stop-Zoom Timing Sequence */
+        @keyframes dynamicFly {
+            0% { left: -180px; transform: scale(0.7); }
+            30% { left: calc(50% - 75px); transform: scale(1.1); } /* Stop & hover in center */
+            60% { left: calc(50% - 75px); transform: scale(1.1); } /* Hold positioning */
+            65% { left: calc(50% - 85px); transform: scale(1.15); } /* Subtle cockpit pull back */
+            100% { left: 120vw; transform: scale(1.6); } /* Mach launch off right screen */
+        }
+
+        /* Supercharged Engine Flame Thrust Scale Sequence */
+        @keyframes engineThrottle {
+            0% { transform: scaleX(0.5); opacity: 0.5; }
+            59% { transform: scaleX(0.6); opacity: 0.7; }
+            60% { transform: scaleX(3.5) scaleY(1.8); fill: #00f2ff; filter: drop-shadow(0 0 15px #00f2ff); opacity: 1; } /* Flame explodes outward */
+            100% { transform: scaleX(2.5) scaleY(1.2); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
+        }
+
+        @keyframes warpDrive { 0% { opacity: 0; background-size: 100% 100%, 10px 100%; } 60% { opacity: 0.3; } 100% { opacity: 1; background-size: 100% 100%, 800px 100%; } }
+        @keyframes flashTrigger { 0% { opacity:0; } 60% { opacity:0; } 65% { opacity:1; } 100% { opacity:0; } }
+
+        .run-warp { animation: warpDrive 3.5s cubic-bezier(0.1, 0.8, 0.1, 1) forwards; }
+        .run-rocket { animation: dynamicFly 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        .run-flash { animation: flashTrigger 3.5s ease-out forwards; }
+        .active-fire { animation: engineThrottle 3.5s linear infinite; transform-origin: right center; }
     </style>
 </head>
 <body>
 <div id="reward-stage">
     <div id="flash" class="screen-flash"></div>
     <div id="warp" class="warp-lines"></div>
-    <div class="hud-overlay">⚡ WARP DRIVES ACTIVE ⚡</div>
+    <div class="hud-overlay">⚡ HYPER-DRIVE ENGAGED ⚡</div>
     <div id="rocket" class="rocket-sprite">
-        <svg viewBox="0 0 100 100" width="100%">
-            <path d="M15,50 L0,45 L5,50 L0,55 Z" fill="#ff007f">
-                <animate attributeName="d" values="M15,50 L0,45 L5,50 L0,55 Z;M15,50 L-15,40 L-5,50 L-15,60 Z;M15,50 L0,45 L5,50 L0,55 Z" dur="0.1s" repeatCount="indefinite"/>
-            </path>
-            <path d="M15,50 L5,48 L8,50 L5,52 Z" fill="#ffcc00"/>
-            <path d="M85,50 C60,62 30,62 15,50 C30,38 60,38 85,50 Z" fill="#e0e0e0" stroke="#00f2ff" stroke-width="2"/>
-            <path d="M35,39 L20,20 L25,39 Z" fill="#ff007f"/>
-            <path d="M35,61 L20,80 L25,61 Z" fill="#ff007f"/>
-            <circle cx="60" cy="50" r="7" fill="#00f2ff"/>
+        <svg viewBox="0 0 120 100" width="100%">
+            <!-- Flame jet linked directly to the new throttle physics -->
+            <path id="booster-flame" class="active-fire" d="M25,50 L2,42 L8,50 L2,58 Z" fill="#ff007f"/>
+            <path d="M25,50 L12,47 L15,50 L12,53 Z" fill="#ffcc00"/>
+            <path d="M95,50 C70,62 40,62 25,50 C40,38 70,38 95,50 Z" fill="#e0e0e0" stroke="#00f2ff" stroke-width="2"/>
+            <path d="M45,39 L30,20 L35,39 Z" fill="#ff007f"/>
+            <path d="M45,61 L30,80 L35,61 Z" fill="#ff007f"/>
+            <circle cx="70" cy="50" r="7" fill="#00f2ff"/>
         </svg>
     </div>
 </div>
+
 <div class="box">
     <div id="v1" class="view-pane" style="display: block;">
         <h1>🚀 Space Rescue</h1>
-        <p>Alien Scrappers stole our fleet's power crystals! Calculate the math codes to trigger hyper-drive rescue sequence.</p>
+        <p>Alien Scrappers stole our fleet's power crystals! Calculate the random math codes to jump your fleet safely to hyperspace.</p>
         <button onclick="startGame()">Launch Mission</button>
     </div>
+
     <div id="v2" class="view-pane" style="display: none;">
         <h2 id="title" style="color: #00f2ff; margin-bottom: 5px;">Sector 1</h2>
         <p id="story" style="font-size: 14px; margin-top: 0; min-height: 40px; color: #ccc;"></p>
@@ -126,44 +150,78 @@
         <p id="feed"></p>
         <button onclick="verifyAnswer()" style="box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3); background: linear-gradient(135deg, #00f2ff, #00a2ff);">Submit Core Code</button>
     </div>
+
     <div id="v3" class="view-pane" style="display: none;">
-        <h1 style="color: #00ff66;">🏆 Fleet Saved!</h1>
-        <p>The galaxy is completely safe! Excellent logical regrouping, Commander.</p>
+        <h1>🏆 Fleet Saved!</h1>
+        <p>The galaxy is completely safe! Infinite configuration master path unlocked.</p>
         <button onclick="resetGame()">Play Academy Again</button>
     </div>
 </div>
 <script>
-    const data = [
-        {t: "Sector 1: The Nebula Network", s: "A starship has 52 power crystals. The Scrappers tractor-beamed 27 away. How many remain?", a: 52, b: 27, r: 25},
-        {t: "Sector 2: Asteroid Alley", s: "Your squad has 41 hyper-drives online. A solar flare fries 18. How many work?", a: 41, b: 18, r: 23},
-        {t: "Sector 3: The Alien Mothership", s: "The alien shield wall has 63 layers. Your disrupt blasters collapse 39 layers. How many are left?", a: 63, b: 39, r: 24}
+    let currentSector = 1;
+    let topNumber = 0;
+    let bottomNumber = 0;
+    let correctSolution = 0;
+    let tens = 0, ones = 0, doneTrade = false;
+
+    // Dynamic story template database
+    const spaceStories = [
+        "A fleet scout vessel logs [A] cargo battery pods. Space marauders extract [B] pods. How many remain?",
+        "Your engine panel monitors [A] ignition pins. A heavy cosmic ray bursts [B] pins offline. How many still fire?",
+        "An enemy defense grid deploys [A] force shield zones. Your lasers systematically shatter [B] zones. How many zones hold?"
     ];
-    let idx = 0, tens = 0, ones = 0, doneTrade = false;
+
+    function generateRandomProblem() {
+        // Generate a random double-digit top number between 40 and 95
+        topNumber = Math.floor(Math.random() * 56) + 40;
+        
+        let topOnes = topNumber % 10;
+        
+        // Force regrouping configuration by ensuring bottom ones place value is larger than top ones place value
+        let bottomOnes = Math.floor(Math.random() * (9 - (topOnes + 1) + 1)) + (topOnes + 1);
+        let bottomTens = Math.floor(Math.random() * (Math.floor(topNumber / 10) - 1)) + 1;
+        
+        bottomNumber = (bottomTens * 10) + bottomOnes;
+        correctSolution = topNumber - bottomNumber;
+    }
+
     function startGame() {
-        idx = 0;
+        currentSector = 1;
         document.getElementById('v1').style.display = 'none';
         document.getElementById('v3').style.display = 'none';
         document.getElementById('v2').style.display = 'block';
         loadMission();
     }
+
     function loadMission() {
-        let m = data[idx];
-        document.getElementById("title").innerText = m.t;
-        document.getElementById("story").innerText = m.s;
-        document.getElementById("num1").innerText = m.a;
-        document.getElementById("num2").innerText = m.b;
+        generateRandomProblem();
+        
+        document.getElementById("title").innerText = "Sector " + currentSector + ": Deep Reconnaissance";
+        
+        // Inject randomized values directly into the active story text
+        let randomStoryText = spaceStories[(currentSector - 1) % spaceStories.length];
+        randomStoryText = randomStoryText.replace("[A]", topNumber).replace("[B]", bottomNumber);
+        document.getElementById("story").innerText = randomStoryText;
+        
+        document.getElementById("num1").innerText = topNumber;
+        document.getElementById("num2").innerText = bottomNumber;
         document.getElementById("ans").value = "";
         document.getElementById("feed").innerText = "";
         document.getElementById("trade-btn").style.display = "inline-block";
-        tens = Math.floor(m.a / 10); ones = m.a % 10; doneTrade = false;
+        
+        tens = Math.floor(topNumber / 10); 
+        ones = topNumber % 10; 
+        doneTrade = false;
         draw();
     }
+
     function draw() {
         let ta = document.getElementById("t-area"), oa = document.getElementById("o-area");
         ta.innerHTML = ""; oa.innerHTML = "";
         for(let i=0; i<tens; i++) ta.innerHTML += '<div class="rod"></div>';
         for(let i=0; i<ones; i++) oa.innerHTML += '<div class="cube"></div>';
     }
+
     function tradeTen() {
         if(tens > 0 && !doneTrade) {
             tens--; ones += 10; doneTrade = true;
@@ -172,33 +230,39 @@
             let f = document.getElementById("feed"); f.style.color = "#00ff66"; f.innerText = "⚡ ENERGY SURGE! 1 Ten split into 10 Ones!";
         }
     }
+
     function playRewardAnimation(callback) {
         const stage = document.getElementById('reward-stage');
         const flash = document.getElementById('flash');
         const warp = document.getElementById('warp');
         const rocket = document.getElementById('rocket');
+
         stage.style.display = 'block';
-        flash.style.animation = 'flashTrigger 0.4s ease-out forwards';
-        warp.style.animation = 'warpDrive 2s cubic-bezier(0.1, 0.8, 0.1, 1) forwards';
-        rocket.style.animation = 'blastAcross 2s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+        flash.className = 'screen-flash run-flash';
+        warp.className = 'warp-lines run-warp';
+        rocket.className = 'rocket-sprite run-rocket';
+
+        // Keep stage alive slightly longer (3.5s) to allow for hover and blast phase
         setTimeout(() => {
             stage.style.display = 'none';
-            flash.style.animation = '';
-            warp.style.animation = '';
-            rocket.style.animation = '';
+            flash.className = 'screen-flash';
+            warp.className = 'warp-lines';
+            rocket.className = 'rocket-sprite';
             callback();
-        }, 2000);
+        }, 3500);
     }
+
     function verifyAnswer() {
         let input = parseInt(document.getElementById("ans").value);
         let f = document.getElementById("feed");
         if(isNaN(input)) { f.style.color = "#ff3333"; f.innerText = "⚠️ Input a numerical navigation code."; return; }
-        if(input === data[idx].r) {
+
+        if(input === correctSolution) {
             f.style.color = "#00ff66"; f.innerText = "🎯 COORDINATES LOCKED! Preparing jump...";
             setTimeout(() => {
                 playRewardAnimation(() => {
-                    idx++;
-                    if(idx < data.length) { loadMission(); } 
+                    currentSector++;
+                    if(currentSector <= 3) { loadMission(); } 
                     else { document.getElementById("v2").style.display = "none"; document.getElementById("v3").style.display = "block"; }
                 });
             }, 800);
@@ -207,6 +271,7 @@
             f.innerText = !doneTrade ? "❌ Shield failure! Try trading 1 Ten next door to get more Ones cubes!" : "❌ Recalibrating coordinates... Try counting the cubes again!";
         }
     }
+
     function resetGame() {
         document.getElementById('v3').style.display = 'none';
         document.getElementById('v2').style.display = 'none';
