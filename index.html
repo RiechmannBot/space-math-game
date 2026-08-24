@@ -133,103 +133,84 @@
             height: 24px;
             background: linear-gradient(#00ff66, #00993d);
         }
-        .math-terminal { 
-            font-size: 40px; font-family: monospace; font-weight: bold; background: #000; 
-            padding: 10px; border-radius: 8px; text-align: right; border-bottom: 4px solid white;
-            letter-spacing: 4px; width: 140px; margin: 15px auto;
-        }
-        button { 
-            background: linear-gradient(135deg, #ff007f, #b30059); 
-            color: white; border: none; padding: 12px 24px; font-size: 16px; 
-            font-weight: bold; border-radius: 50px; cursor: pointer; margin: 5px; 
-            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4); transition: transform 0.2s;
-        }
-        button:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff007f; }
-        
-        #reward-stage { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020208; z-index: 9999; }
-        .warp-lines { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px); background-size: 100% 100%, 40px 100%; opacity: 0; }
-        .rocket-sprite { position: absolute; width: 150px; }
-        .screen-flash { position: absolute; width:100%; height:100%; background: #00f2ff; opacity: 0; pointer-events: none; }
-        .hud-overlay { position: absolute; top: 15%; left: 0; width: 100%; color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace; text-shadow: 0 0 10px #00ff66; letter-spacing: 2px; }
-
-        .rocket-horizontal { left: -180px; top: 45%; }
-        @keyframes dynamicFlyHorizontal {
-            0% { left: -180px; transform: scale(0.7); }
-            30% { left: calc(50% - 75px); transform: scale(1.1); }
-            60% { left: calc(50% - 75px); transform: scale(1.1); }
-            65% { left: calc(50% - 85px); transform: scale(1.15); }
-            100% { left: 120vw; transform: scale(1.6); }
-        }
-        @keyframes engineThrottleHorizontal {
-            0% { transform: scaleX(0.5); opacity: 0.5; }
-            59% { transform: scaleX(0.6); opacity: 0.7; }
-            60% { transform: scaleX(3.5) scaleY(1.8); fill: #00f2ff; filter: drop-shadow(0 0 15px #00f2ff); opacity: 1; }
-            100% { transform: scaleX(2.5) scaleY(1.2); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
-        }
-
-        .rocket-vertical { left: calc(50% - 75px); top: 110vh; }
-        @keyframes dynamicFlyVertical {
-            0% { top: 110vh; transform: scale(0.7) rotate(-90deg); }
-            30% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
-            60% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
-            65% { top: calc(50% - 65px); transform: scale(1.15) rotate(-90deg); }
-            100% { top: -150vh; transform: scale(1.8) rotate(-90deg); }
-        }
-        @keyframes engineThrottleVertical {
-            0% { transform: scaleX(0.5); opacity: 0.5; }
-            59% { transform: scaleX(0.6); opacity: 0.7; }
-            60% { transform: scaleX(4.5) scaleY(2.2); fill: #ffe600; filter: drop-shadow(0 0 20px #ffe600); opacity: 1; }
-            100% { transform: scaleX(3.0) scaleY(1.4); fill: #ff3300; filter: drop-shadow(0 0 30px #ff3300); opacity: 1; }
-        }
-
-        /* NEW: Volumetric Particle Billow System for Final Stage Rocket Smoke */
-        .smoke-cloud {
-            position: absolute;
-            background: radial-gradient(circle, rgba(180,180,200,0.6) 10%, rgba(100,100,120,0.2) 50%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 0;
-            filter: blur(4px);
-        }
-        @keyframes smokePuffLeft {
-            0% { width: 40px; height: 40px; left: calc(50% - 20px); top: calc(50% + 40px); opacity: 0; transform: scale(0.5); }
-            60% { opacity: 0.8; }
-            100% { width: 180px; height: 180px; left: calc(50% - 150px); top: calc(50% + 80px); opacity: 0; transform: scale(1.3); }
-        }
-        @keyframes smokePuffRight {
-            0% { width: 40px; height: 40px; left: calc(50% - 20px); top: calc(50% + 40px); opacity: 0; transform: scale(0.5); }
-            60% { opacity: 0.8; }
-            100% { width: 180px; height: 180px; left: calc(50% + 10px); top: calc(50% + 80px); opacity: 0; transform: scale(1.3); }
-        }
-        @keyframes smokePuffCenter {
-            0% { width: 30px; height: 30px; left: calc(50% - 15px); top: calc(50% + 40px); opacity: 0; transform: scale(0.5); }
-            60% { opacity: 0.9; background: radial-gradient(circle, rgba(255,150,0,0.4), rgba(120,120,140,0.2) 60%, transparent); }
-            100% { width: 220px; height: 220px; left: calc(50% - 110px); top: calc(50% + 110px); opacity: 0; transform: scale(1.5); }
-        }
-
-        .trigger-smoke-l { animation: smokePuffLeft 3.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
-        .trigger-smoke-r { animation: smokePuffRight 3.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
-        .trigger-smoke-c { animation: smokePuffCenter 3.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
-
-        @keyframes warpDrive { 0% { opacity: 0; background-size: 100% 100%, 10px 100%; } 60% { opacity: 0.3; } 100% { opacity: 1; background-size: 100% 100%, 800px 100%; } }
-        @keyframes flashTrigger { 0% { opacity:0; } 60% { opacity:0; } 62% { opacity:0.25; background:#fff; } 65% { opacity:0.15; background:#00f2ff; } 100% { opacity:0; } }
-
-        .run-warp { animation: warpDrive 3.5s cubic-bezier(0.1, 0.8, 0.1, 1) forwards; }
-        .run-flash { animation: flashTrigger 3.5s ease-out forwards; }
     </style>
+</head>
+<style>
+    .math-terminal { 
+        font-size: 40px; font-family: monospace; font-weight: bold; background: #000; 
+        padding: 10px; border-radius: 8px; text-align: right; border-bottom: 4px solid white;
+        letter-spacing: 4px; width: 140px; margin: 15px auto;
+    }
+    button { 
+        background: linear-gradient(135deg, #ff007f, #b30059); 
+        color: white; border: none; padding: 12px 24px; font-size: 16px; 
+        font-weight: bold; border-radius: 50px; cursor: pointer; margin: 5px; 
+        box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4); transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff007f; }
+    
+    #reward-stage { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020208; z-index: 9999; }
+    .warp-lines { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px); background-size: 100% 100%, 40px 100%; opacity: 0; }
+    .rocket-sprite { position: absolute; width: 150px; z-index: 100; }
+    .screen-flash { position: absolute; width:100%; height:100%; background: #00f2ff; opacity: 0; pointer-events: none; }
+    .hud-overlay { position: absolute; top: 15%; left: 0; width: 100%; color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace; text-shadow: 0 0 10px #00ff66; letter-spacing: 2px; }
+
+    .rocket-horizontal { left: -180px; top: 45%; }
+    @keyframes dynamicFlyHorizontal {
+        0% { left: -180px; transform: scale(0.7); }
+        30% { left: calc(50% - 75px); transform: scale(1.1); }
+        60% { left: calc(50% - 75px); transform: scale(1.1); }
+        65% { left: calc(50% - 85px); transform: scale(1.15); }
+        100% { left: 120vw; transform: scale(1.6); }
+    }
+    @keyframes engineThrottleHorizontal {
+        0% { transform: scaleX(0.5); opacity: 0.5; }
+        59% { transform: scaleX(0.6); opacity: 0.7; }
+        60% { transform: scaleX(3.5) scaleY(1.8); fill: #00f2ff; filter: drop-shadow(0 0 15px #00f2ff); opacity: 1; }
+        100% { transform: scaleX(2.5) scaleY(1.2); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
+    }
+
+    .rocket-vertical { left: calc(50% - 75px); top: 110vh; }
+    @keyframes dynamicFlyVertical {
+        0% { top: 110vh; transform: scale(0.7) rotate(-90deg); }
+        30% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
+        60% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
+        65% { top: calc(50% - 65px); transform: scale(1.15) rotate(-90deg); }
+        100% { top: -150vh; transform: scale(1.8) rotate(-90deg); }
+    }
+    @keyframes engineThrottleVertical {
+        0% { transform: scaleX(0.5); opacity: 0.5; }
+        59% { transform: scaleX(0.6); opacity: 0.7; }
+        60% { transform: scaleX(4.5) scaleY(2.2); fill: #ffe600; filter: drop-shadow(0 0 20px #ffe600); opacity: 1; }
+        100% { transform: scaleX(3.0) scaleY(1.4); fill: #ff3300; filter: drop-shadow(0 0 30px #ff3300); opacity: 1; }
+    }
+
+    .trail-particle {
+        position: absolute;
+        background: radial-gradient(circle, rgba(200,200,220,0.7) 0%, rgba(100,100,110,0.3) 50%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 50;
+        animation: billowSmoke 0.8s ease-out forwards;
+    }
+    @keyframes billowSmoke {
+        0% { transform: scale(0.3); opacity: 0.9; filter: blur(2px); }
+        50% { opacity: 0.6; background: radial-gradient(circle, rgba(255,100,0,0.3), rgba(120,120,130,0.2) 50%, transparent); }
+        100% { transform: scale(2.5); opacity: 0; filter: blur(8px); }
+    }
+
+    @keyframes warpDrive { 0% { opacity: 0; background-size: 100% 100%, 10px 100%; } 60% { opacity: 0.3; } 100% { opacity: 1; background-size: 100% 100%, 800px 100%; } }
+    @keyframes flashTrigger { 0% { opacity:0; } 60% { opacity:0; } 62% { opacity:0.25; background:#fff; } 65% { opacity:0.15; background:#00f2ff; } 100% { opacity:0; } }
+
+    .run-warp { animation: warpDrive 3.5s cubic-bezier(0.1, 0.8, 0.1, 1) forwards; }
+    .run-flash { animation: flashTrigger 3.5s ease-out forwards; }
+</style>
 </head>
 <body>
 <div id="reward-stage">
     <div id="flash" class="screen-flash"></div>
     <div id="warp" class="warp-lines"></div>
-    
-    <!-- NEW: Smoke layers anchored below the launchpad coordinates -->
-    <div id="smoke-l" class="smoke-cloud"></div>
-    <div id="smoke-r" class="smoke-cloud"></div>
-    <div id="smoke-c" class="smoke-cloud"></div>
-    
     <div id="hud-alert" class="hud-overlay">⚡ HYPER-DRIVE ENGAGED ⚡</div>
-    
     <div id="rocket" class="rocket-sprite">
         <svg viewBox="0 0 120 100" width="100%">
             <path id="booster-flame" d="M25,50 L2,42 L8,50 L2,58 Z" fill="#ff007f"/>
@@ -241,9 +222,7 @@
         </svg>
     </div>
 </div>
-
 <div class="console-frame">
-    <!-- VIEW 1: INTRO MENU -->
     <div id="v1" class="view-pane" style="display: block;">
         <h1>🚀 Space Rescue Academy</h1>
         <p>Alien Scrappers stole our fleet's power crystals! Let's initialize target collectors using dynamic fuel pins.</p>
@@ -251,12 +230,9 @@
         <button onclick="startGame()">Launch Command Console</button>
     </div>
 
-    <!-- VIEW 2: TACTICAL WORKSPACE -->
     <div id="v2" class="view-pane" style="display: none;">
         <h2 id="title" style="color: #00f2ff; margin: 0;">Sector 1</h2>
-        
         <div class="grid-layout">
-            <!-- Left Side: Problem Card Terminal -->
             <div class="sidebar">
                 <div style="font-size: 11px; font-weight: bold; color: #ff007f; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px dashed rgba(255,0,127,0.4); padding-bottom: 4px;">Mission Protocol</div>
                 <div style="font-size: 12px; color: #aaa; text-align: left; margin: 8px 0; line-height: 1.4;">
@@ -265,18 +241,14 @@
                     3. Click any inside item to erase it.<br>
                     4. Fire engines when ready!
                 </div>
-                
                 <p id="story" style="font-size: 13px; color: #fff; min-height: 60px; text-align: left; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; margin-bottom: 0;"></p>
-                
                 <div class="math-terminal">
                     <div id="num1">0</div>
                     <div style="color: #ff007f;">-<span id="num2">0</span></div>
                 </div>
-                
-                <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px; margin-top: auto; border: 1px solid #555;">🗑️ Reset Collectors</button>
+                <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px; margin-top: auto; border: 1px solid #555;">🗑 ... Reset Collectors</button>
             </div>
 
-            <!-- Right Side: Interactive Drag Stations -->
             <div class="workspace">
                 <div class="supply-shelf">
                     <div class="shelf-item-wrapper">
@@ -289,7 +261,6 @@
                     </div>
                 </div>
 
-                <!-- Drop Boxes -->
                 <div class="bin-row">
                     <div id="tens-bin" class="collector-bin" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, 'tens')">
                         <div class="bin-label" style="color:#ffe600;">TENS COLLECTOR</div>
@@ -299,19 +270,16 @@
                     </div>
                 </div>
 
-                <!-- Value Counters -->
                 <div style="display: flex; justify-content: space-around;">
                     <div>Tens Code Value: <span id="tens-count" class="bin-counter" style="color:#ffe600;">0</span></div>
                     <div>Ones Code Value: <span id="ones-count" class="bin-counter" style="color:#00ff66;">0</span></div>
                 </div>
             </div>
         </div>
-
         <p id="feed" style="margin: 10px 0; min-height: 24px;"></p>
         <button onclick="verifyAnswer()" style="width: 90%; background: linear-gradient(135deg, #00f2ff, #0077ff); box-shadow: 0 4px 15px rgba(0, 242, 255, 0.4);">ENGAGE FLIGHT SEQUENCE USING LIVE PIN CODES</button>
     </div>
 
-    <!-- VIEW 3: WIN SCREEN -->
     <div id="v3" class="view-pane" style="display: none;">
         <h1 style="color: #00ff66;">🏆 Mission Accomplished!</h1>
         <p>Excellent calculation work, Captain! All target sectors are cleared and your math matrix is online.</p>
@@ -322,6 +290,7 @@
     let currentSector = 1;
     let topNumber = 0, bottomNumber = 0, correctSolution = 0;
     let countTens = 0, countOnes = 0;
+    let smokeInterval = null;
 
     const spaceStories = [
         "A starship logs [A] cargo plasma canisters. Scrappers tractor-beamed out [B] canisters. How many containers are left?",
@@ -330,12 +299,10 @@
     ];
 
     function generateRandomProblem() {
-        topNumber = Math.floor(Math.random() * 56) + 40; // 40 to 95
+        topNumber = Math.floor(Math.random() * 56) + 40;
         let topOnes = topNumber % 10;
-        
         let bottomOnes = Math.floor(Math.random() * (9 - (topOnes + 1) + 1)) + (topOnes + 1);
         let bottomTens = Math.floor(Math.random() * (Math.floor(topNumber / 10) - 1)) + 1;
-        
         bottomNumber = (bottomTens * 10) + bottomOnes;
         correctSolution = topNumber - bottomNumber;
     }
@@ -351,34 +318,21 @@
     function loadMission() {
         generateRandomProblem();
         document.getElementById("title").innerText = "Sector " + currentSector + ": Navigation Node";
-        
         let storyStr = spaceStories[(currentSector - 1) % spaceStories.length];
         document.getElementById("story").innerText = storyStr.replace("[A]", topNumber).replace("[B]", bottomNumber);
-        
         document.getElementById("num1").innerText = topNumber;
         document.getElementById("num2").innerText = bottomNumber;
-        
         clearBins();
     }
 
-    function allowDrop(ev) {
-        ev.preventDefault();
-        ev.currentTarget.classList.add('drag-over');
-    }
-
-    function leaveDrop(ev) {
-        ev.currentTarget.classList.remove('drag-over');
-    }
-
-    function drag(ev) {
-        ev.dataTransfer.setData("text", ev.target.id);
-    }
+    function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('drag-over'); }
+    function leaveDrop(ev) { ev.currentTarget.classList.remove('drag-over'); }
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
 
     function drop(ev, binType) {
         ev.preventDefault();
         ev.currentTarget.classList.remove('drag-over');
         let id = ev.dataTransfer.getData("text");
-        
         if (id === "source-rod" && binType === "tens") {
             let clonedRod = document.createElement("div");
             clonedRod.className = "token token-rod";
@@ -412,13 +366,9 @@
         updateCounters();
     }
 
-    document.getElementById("source-rod").addEventListener("touchstart", handleMobileTapThrustTens);
-    document.getElementById("source-cube").addEventListener("touchstart", handleMobileTapThrustOnes);
-
     function updateCounters() {
         countTens = document.getElementById("tens-bin").getElementsByClassName("token-rod").length;
         countOnes = document.getElementById("ones-bin").getElementsByClassName("token-cube").length;
-        
         document.getElementById("tens-count").innerText = countTens;
         document.getElementById("ones-count").innerText = countOnes;
     }
@@ -426,14 +376,34 @@
     function clearBins() {
         let binTens = document.getElementById("tens-bin");
         let rods = binTens.getElementsByClassName("token-rod");
-        while(rods.length > 0) { rods.remove(); }
-        
+        while(rods.length > 0) { rods[0].remove(); }
         let binOnes = document.getElementById("ones-bin");
         let cubes = binOnes.getElementsByClassName("token-cube");
-        while(cubes.length > 0) { cubes.remove(); }
-        
+        while(cubes.length > 0) { cubes[0].remove(); }
         document.getElementById("feed").innerText = "";
         updateCounters();
+    }
+
+    function startSmokeTrail() {
+        const stage = document.getElementById('reward-stage');
+        const rocket = document.getElementById('rocket');
+        smokeInterval = setInterval(() => {
+            let rect = rocket.getBoundingClientRect();
+            let particle = document.createElement('div');
+            particle.className = 'trail-particle';
+            let size = Math.floor(Math.random() * 20) + 30;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            if (currentSector === 3) {
+                particle.style.left = (rect.left + (rect.width / 2) - (size / 2)) + 'px';
+                particle.style.top = (rect.bottom - 20) + 'px';
+            } else {
+                particle.style.left = (rect.left + 15) + 'px';
+                particle.style.top = (rect.top + (rect.height / 2) - (size / 2)) + 'px';
+            }
+            stage.appendChild(particle);
+            setTimeout(() => { particle.remove(); }, 800);
+        }, 25);
     }
 
     function playRewardAnimation(callback) {
@@ -443,10 +413,6 @@
         const rocket = document.getElementById('rocket');
         const flame = document.getElementById('booster-flame');
         const hud = document.getElementById('hud-alert');
-        
-        const sl = document.getElementById('smoke-l');
-        const sr = document.getElementById('smoke-r');
-        const sc = document.getElementById('smoke-c');
 
         stage.style.display = 'block';
         flash.className = 'screen-flash run-flash';
@@ -456,12 +422,6 @@
             hud.innerText = "🚨 ORBITAL ASCENT PROFILE LOCKED 🚨";
             hud.style.color = "#ffe600";
             hud.style.textShadow = "0 0 10px #ffe600";
-            
-            // NEW: Fire the vertical particle vectors simultaneously with throttle load
-            sl.className = 'smoke-cloud trigger-smoke-l';
-            sr.className = 'smoke-cloud trigger-smoke-r';
-            sc.className = 'smoke-cloud trigger-smoke-c';
-            
             rocket.className = 'rocket-sprite rocket-vertical';
             rocket.style.animation = 'dynamicFlyVertical 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
             flame.className = 'active-fire';
@@ -470,8 +430,7 @@
         } else {
             hud.innerText = "⚡ HYPER-DRIVE ENGAGED ⚡";
             hud.style.color = "#00ff66";
-            hud.style.textShadow = "0 0 10px #00ff6 Green";
-            
+            hud.style.textShadow = "0 0 10px #00ff66";
             rocket.className = 'rocket-sprite rocket-horizontal';
             rocket.style.animation = 'dynamicFlyHorizontal 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
             flame.className = 'active-fire';
@@ -479,16 +438,15 @@
             flame.style.animation = 'engineThrottleHorizontal 3.5s linear infinite';
         }
 
+        startSmokeTrail();
+
         setTimeout(() => {
+            clearInterval(smokeInterval);
             stage.style.display = 'none';
             flash.className = 'screen-flash';
             warp.className = 'warp-lines';
-            
-            // Reset particle node tags cleanly
-            sl.className = 'smoke-cloud';
-            sr.className = 'smoke-cloud';
-            sc.className = 'smoke-cloud';
-            
+            let activeParticles = stage.getElementsByClassName('trail-particle');
+            while(activeParticles.length > 0) { activeParticles[0].remove(); }
             rocket.className = 'rocket-sprite';
             flame.className = '';
             rocket.style.animation = '';
@@ -500,17 +458,14 @@
     function verifyAnswer() {
         let finalSubmittedValue = (countTens * 10) + countOnes;
         let f = document.getElementById("feed");
-
         if (finalSubmittedValue === 0) {
             f.style.color = "#ff3333";
             f.innerText = "⚠️ Terminal empty! Drag pins into the containers to calibrate code values.";
             return;
         }
-
         if (finalSubmittedValue === correctSolution) {
             f.style.color = "#00ff66"; 
             f.innerText = "🎯 PIN CONFIGURATION ACCEPTED! Initializing warp thrust sequence...";
-            
             setTimeout(() => {
                 playRewardAnimation(() => {
                     currentSector++;
