@@ -17,12 +17,11 @@
             padding: 20px;
             background-color: var(--space-bg);
             color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         #game-container {
@@ -38,7 +37,6 @@
 
         h1 {
             color: var(--neon-blue);
-            margin-top: 0;
             text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
         }
 
@@ -47,7 +45,7 @@
         }
 
         .active {
-            display: block;
+            display: block !important;
         }
 
         button {
@@ -58,15 +56,13 @@
             font-size: 18px;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+            transition: all 0.2s ease;
             margin: 10px;
         }
 
         button:hover {
             background: var(--neon-pink);
             box-shadow: 0 0 20px rgba(255, 0, 127, 0.6);
-            transform: scale(1.05);
         }
 
         .math-box {
@@ -75,7 +71,7 @@
             padding: 20px;
             margin: 20px auto;
             width: fit-content;
-            font-size: 32px;
+            font-size: 36px;
             font-family: monospace;
             text-align: right;
             border-left: 4px solid var(--neon-blue);
@@ -84,37 +80,24 @@
 
         .line {
             border-bottom: 4px solid var(--text-color);
-            margin-top: 5px;
-            margin-bottom: 5px;
+            margin: 10px 0;
         }
 
         input[type="number"] {
             background: transparent;
             border: 2px dashed var(--neon-blue);
             color: var(--text-color);
-            font-size: 28px;
-            width: 60px;
+            font-size: 32px;
+            width: 80px;
             text-align: center;
             font-family: monospace;
             border-radius: 5px;
         }
 
-        input[type="number"]:focus {
-            outline: none;
-            border-color: var(--neon-pink);
-        }
-
-        /* Hide spinner arrows in input */
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
         .visual-blocks {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 40px;
             margin: 20px 0;
             background: rgba(255, 255, 255, 0.02);
             padding: 15px;
@@ -130,7 +113,7 @@
         .group-title {
             font-size: 14px;
             color: var(--neon-blue);
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
 
         .blocks-display {
@@ -139,7 +122,7 @@
             flex-wrap: wrap;
             max-width: 150px;
             justify-content: center;
-            min-height: 50px;
+            min-height: 60px;
         }
 
         .ten-rod {
@@ -160,11 +143,10 @@
 
         .feedback {
             font-size: 18px;
-            height: 25px;
+            height: 30px;
             margin: 15px 0;
             font-weight: bold;
         }
-
         .success { color: #00ff66; }
         .error { color: #ff3333; }
     </style>
@@ -178,51 +160,48 @@
         <p>Welcome, Cadet! Alien Scrappers have stolen fuel crystals from our fleet.</p>
         <p>We need to calculate our remaining power levels to make the jump to hyperspace!</p>
         <p><strong>Your Mission Trick:</strong> If there are more ones on the floor, go next door and break a Ten Rod down!</p>
-        <button onclick="startGame()">Launch Mission</button>
+        <button id="launch-btn">Launch Mission</button>
     </div>
 
     <!-- GAMEPLAY SCREEN -->
     <div id="game-screen" class="screen">
-        <h2 id="sector-title">Sector 1: Nebula Network</h2>
-        <p id="story-text">Loading mission data...</p>
+        <h2 id="sector-title">Sector 1</h2>
+        <p id="story-text">Loading...</p>
 
-        <!-- Visual representation of Base-10 Blocks -->
         <div class="visual-blocks">
             <div class="block-group">
-                <div class="group-title">Tens Rods</div>
+                <div class="group-title">Tens Rods (10s)</div>
                 <div id="tens-display" class="blocks-display"></div>
             </div>
             <div class="block-group">
-                <div class="group-title">Ones Cubes</div>
+                <div class="group-title">Ones Cubes (1s)</div>
                 <div id="ones-display" class="blocks-display"></div>
             </div>
         </div>
 
-        <button id="regroup-btn" onclick="regroupTens()" style="border-color: #ffcc00; font-size: 14px; padding: 6px 12px;">🔄 Trade 1 Ten for 10 Ones</button>
+        <button id="regroup-btn" style="border-color: #ffcc00; font-size: 14px; padding: 6px 12px;">🔄 Trade 1 Ten for 10 Ones</button>
 
-        <!-- Traditional Column Math Setup -->
         <div class="math-box">
-            <div id="math-top">52</div>
-            <div>-<span id="math-bottom">27</span></div>
+            <div id="math-top">0</div>
+            <div>-<span id="math-bottom">0</span></div>
             <div class="line"></div>
             <div><input type="number" id="user-answer" placeholder="??"></div>
         </div>
 
         <div id="feedback-msg" class="feedback"></div>
-        <button onclick="checkAnswer()">Submit Calculation</button>
+        <button id="submit-btn">Submit Calculation</button>
     </div>
 
     <!-- WIN SCREEN -->
     <div id="win-screen" class="screen">
         <h1>🏆 Galaxy Saved!</h1>
-        <p>Fantastic job, Captain! You recovered all the crystals and mastered double-digit subtraction regrouping.</p>
-        <p>The Star Fleet thanks you for your quick thinking and mathematical precision.</p>
-        <button onclick="resetGame()">Play Again</button>
+        <p>Fantastic job, Captain! You recovered all the crystals and mastered regrouping.</p>
+        <button id="restart-btn">Play Again</button>
     </div>
 </div>
 
 <script>
-    // Game State Configurations (3 Story Levels)
+    // Game Levels Setup
     const levels = [
         {
             title: "Sector 1: The Nebula Network",
@@ -252,15 +231,23 @@
     let visualOnes = 0;
     let hasRegrouped = false;
 
-    function startGame() {
-        changeScreen('game-screen');
-        currentLevel = 0;
-        loadLevel();
-    }
+    // Attach Event Listeners cleanly after page load
+    document.getElementById('launch-btn').addEventListener('click', startGame);
+    document.getElementById('regroup-btn').addEventListener('click', regroupTens);
+    document.getElementById('submit-btn').addEventListener('click', checkAnswer);
+    document.getElementById('restart-btn').addEventListener('click', resetGame);
 
     function changeScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('start-screen').classList.remove('active');
+        document.getElementById('game-screen').classList.remove('active');
+        document.getElementById('win-screen').classList.remove('active');
         document.getElementById(screenId).classList.add('active');
+    }
+
+    function startGame() {
+        currentLevel = 0;
+        changeScreen('game-screen');
+        loadLevel();
     }
 
     function loadLevel() {
@@ -272,7 +259,6 @@
         document.getElementById('user-answer').value = '';
         document.getElementById('feedback-msg').innerText = '';
         
-        // Initialize base-10 visual blocks based on the top starting number
         visualTens = Math.floor(lvl.top / 10);
         visualOnes = lvl.top % 10;
         hasRegrouped = false;
@@ -284,7 +270,6 @@
     function renderBlocks() {
         const tensDisplay = document.getElementById('tens-display');
         const onesDisplay = document.getElementById('ones-display');
-        
         tensDisplay.innerHTML = '';
         onesDisplay.innerHTML = '';
 
@@ -306,14 +291,24 @@
             visualTens -= 1;
             visualOnes += 10;
             hasRegrouped = true;
-            document.getElementById('regroup-btn').style.display = 'none'; // Only allow once per problem
+            document.getElementById('regroup-btn').style.display = 'none';
             renderBlocks();
             
             const msg = document.getElementById('feedback-msg');
             msg.className = "feedback success";
-            msg.innerText = "⚡ ZAP! 1 Ten traded for 10 Ones! Look at all those extra cubes!";
+            msg.innerText = "⚡ ZAP! Traded 1 Ten for 10 Ones! Look at all those extra cubes!";
         }
     }
 
     function checkAnswer() {
+        const userAns = parseInt(document.getElementById('user-answer').value);
+        const correctAns = levels[currentLevel].ans;
+        const msg = document.getElementById('feedback-msg');
 
+        if (isNaN(userAns)) {
+            msg.className = "feedback error";
+            msg.innerText = "Enter a code number to fire the blasters!";
+            return;
+        }
+
+        if (userAns === correctAns) {
