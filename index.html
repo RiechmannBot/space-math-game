@@ -222,6 +222,7 @@
         </svg>
     </div>
 </div>
+
 <div class="console-frame">
     <div id="v1" class="view-pane" style="display: block;">
         <h1>🚀 Space Rescue Academy</h1>
@@ -246,7 +247,7 @@
                     <div id="num1">0</div>
                     <div style="color: #ff007f;">-<span id="num2">0</span></div>
                 </div>
-                <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px; margin-top: auto; border: 1px solid #555;">🗑 ... Reset Collectors</button>
+                <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px; margin-top: auto; border: 1px solid #555;">🗑️ Reset Collectors</button>
             </div>
 
             <div class="workspace">
@@ -376,15 +377,18 @@
     function clearBins() {
         let binTens = document.getElementById("tens-bin");
         let rods = binTens.getElementsByClassName("token-rod");
-        while(rods.length > 0) { rods[0].remove(); }
+        while(rods.length > 0) { rods.remove(); }
         let binOnes = document.getElementById("ones-bin");
         let cubes = binOnes.getElementsByClassName("token-cube");
-        while(cubes.length > 0) { cubes[0].remove(); }
+        while(cubes.length > 0) { cubes.remove(); }
         document.getElementById("feed").innerText = "";
         updateCounters();
     }
 
     function startSmokeTrail() {
+        // Safe check: Only initialize loop generator if playing Level 3
+        if (currentSector !== 3) return;
+
         const stage = document.getElementById('reward-stage');
         const rocket = document.getElementById('rocket');
         smokeInterval = setInterval(() => {
@@ -394,13 +398,10 @@
             let size = Math.floor(Math.random() * 20) + 30;
             particle.style.width = size + 'px';
             particle.style.height = size + 'px';
-            if (currentSector === 3) {
-                particle.style.left = (rect.left + (rect.width / 2) - (size / 2)) + 'px';
-                particle.style.top = (rect.bottom - 20) + 'px';
-            } else {
-                particle.style.left = (rect.left + 15) + 'px';
-                particle.style.top = (rect.top + (rect.height / 2) - (size / 2)) + 'px';
-            }
+            
+            particle.style.left = (rect.left + (rect.width / 2) - (size / 2)) + 'px';
+            particle.style.top = (rect.bottom - 20) + 'px';
+            
             stage.appendChild(particle);
             setTimeout(() => { particle.remove(); }, 800);
         }, 25);
@@ -441,12 +442,12 @@
         startSmokeTrail();
 
         setTimeout(() => {
-            clearInterval(smokeInterval);
+            if (smokeInterval) clearInterval(smokeInterval);
             stage.style.display = 'none';
             flash.className = 'screen-flash';
             warp.className = 'warp-lines';
             let activeParticles = stage.getElementsByClassName('trail-particle');
-            while(activeParticles.length > 0) { activeParticles[0].remove(); }
+            while(activeParticles.length > 0) { activeParticles.remove(); }
             rocket.className = 'rocket-sprite';
             flame.className = '';
             rocket.style.animation = '';
