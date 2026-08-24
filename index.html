@@ -1,312 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Cadet Math Rescue</title>
+    <meta charset="utf-8">
+    <title>Space Subtraction Rescue</title>
     <style>
-        :root {
-            --space-bg: #0b0b1e;
-            --neon-blue: #00f2ff;
-            --neon-pink: #ff007f;
-            --text-color: #ffffff;
-        }
-
-        body {
-            margin: 0;
-            padding: 20px;
-            background-color: var(--space-bg);
-            color: var(--text-color);
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        #game-container {
-            width: 100%;
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--neon-blue);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
-            text-align: center;
-        }
-
-        h1 {
-            color: var(--neon-blue);
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
-        }
-
-        button {
-            background: transparent;
-            color: var(--text-color);
-            border: 2px solid var(--neon-pink);
-            padding: 12px 24px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin: 10px;
-        }
-
-        button:hover {
-            background: var(--neon-pink);
-            box-shadow: 0 0 20px rgba(255, 0, 127, 0.6);
-        }
-
-        .math-box {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px auto;
-            width: fit-content;
-            font-size: 36px;
-            font-family: monospace;
-            text-align: right;
-            border-left: 4px solid var(--neon-blue);
-            letter-spacing: 5px;
-        }
-
-        .line {
-            border-bottom: 4px solid var(--text-color);
-            margin: 10px 0;
-        }
-
-        input[type="number"] {
-            background: transparent;
-            border: 2px dashed var(--neon-blue);
-            color: var(--text-color);
-            font-size: 32px;
-            width: 80px;
-            text-align: center;
-            font-family: monospace;
-            border-radius: 5px;
-        }
-
-        .visual-blocks {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin: 20px 0;
-            background: rgba(255, 255, 255, 0.02);
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        .block-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .group-title {
-            font-size: 14px;
-            color: var(--neon-blue);
-            margin-bottom: 8px;
-        }
-
-        .blocks-display {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            max-width: 150px;
-            justify-content: center;
-            min-height: 60px;
-        }
-
-        .ten-rod {
-            width: 12px;
-            height: 60px;
-            background: #ffcc00;
-            border: 1px solid #fff;
-            border-radius: 2px;
-        }
-
-        .one-cube {
-            width: 12px;
-            height: 12px;
-            background: #00ff66;
-            border: 1px solid #fff;
-            border-radius: 2px;
-        }
-
-        .feedback {
-            font-size: 18px;
-            height: 30px;
-            margin: 15px 0;
-            font-weight: bold;
-        }
-        .success { color: #00ff66; }
-        .error { color: #ff3333; }
+        body { background-color: #0b0b1e; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .box { max-width: 500px; margin: auto; padding: 20px; border: 3px solid #00f2ff; border-radius: 10px; background: rgba(255,255,255,0.05); }
+        button { background: #ff007f; color: white; border: none; padding: 12px 24px; font-size: 18px; border-radius: 5px; cursor: pointer; margin: 10px; }
+        .math { font-size: 40px; font-family: monospace; background: black; padding: 15px; width: 150px; margin: 20px auto; text-align: right; border-bottom: 4px solid white; }
+        input { font-size: 30px; width: 80px; text-align: center; background: transparent; color: white; border: 2px dashed #00f2ff; }
+        .block-container { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .rod { width: 10px; height: 50px; background: #ffcc00; display: inline-block; margin: 2px; }
+        .cube { width: 10px; height: 10px; background: #00ff66; display: inline-block; margin: 2px; }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <!-- START SCREEN -->
-    <div id="start-screen" style="display: block;">
-        <h1>🚀 Space Rescue Academy</h1>
-        <p>Welcome, Cadet! Alien Scrappers have stolen fuel crystals from our fleet.</p>
-        <p>We need to calculate our remaining power levels to make the jump to hyperspace!</p>
-        <p><strong>Your Mission Trick:</strong> If there are more ones on the floor, go next door and break a Ten Rod down!</p>
-        <button id="launch-btn" onclick="startGame()">Launch Mission</button>
+<div class="box">
+    <!-- VIEW 1: INTRO -->
+    <div id="v1" style="display: block;">
+        <h2>🚀 Space Rescue Academy</h2>
+        <p>Alien Scrappers stole our starship fuel crystals! Let's calculate what is left.</p>
+        <button onclick="document.getElementById('v1').style.display='none'; document.getElementById('v2').style.display='block'; loadMission();">Launch Mission</button>
     </div>
 
-    <!-- GAMEPLAY SCREEN -->
-    <div id="game-screen" style="display: none;">
-        <h2 id="sector-title">Sector 1</h2>
-        <p id="story-text">Loading...</p>
+    <!-- VIEW 2: GAMEPLAY -->
+    <div id="v2" style="display: none;">
+        <h3 id="title">Sector 1</h3>
+        <p id="story">Loading mission data...</p>
 
-        <div class="visual-blocks">
-            <div class="block-group">
-                <div class="group-title">Tens Rods (10s)</div>
-                <div id="tens-display" class="blocks-display"></div>
-            </div>
-            <div class="block-group">
-                <div class="group-title">Ones Cubes (1s)</div>
-                <div id="ones-display" class="blocks-display"></div>
-            </div>
+        <div class="block-container">
+            <div><div>Tens (10s)</div><div id="t-area"></div></div>
+            <div><div>Ones (1s)</div><div id="o-area"></div></div>
         </div>
 
-        <button id="regroup-btn" onclick="regroupTens()" style="border-color: #ffcc00; font-size: 14px; padding: 6px 12px;">🔄 Trade 1 Ten for 10 Ones</button>
+        <button id="trade-btn" onclick="tradeTen()" style="background: #ffcc00; color: black; font-size: 14px;">🔄 Trade 1 Ten for 10 Ones</button>
 
-        <div class="math-box">
-            <div id="math-top">0</div>
-            <div>-<span id="math-bottom">0</span></div>
-            <div class="line"></div>
-            <div><input type="number" id="user-answer" placeholder="??"></div>
+        <div class="math">
+            <div id="num1">52</div>
+            <div style="border-bottom: 4px solid white;">-<span id="num2">27</span></div>
+            <input type="number" id="ans" placeholder="??">
         </div>
 
-        <div id="feedback-msg" class="feedback"></div>
-        <button id="submit-btn" onclick="checkAnswer()">Submit Calculation</button>
+        <p id="feed" style="font-weight: bold; min-height: 24px;"></p>
+        <button onclick="verifyAnswer()">Submit Code</button>
     </div>
 
-    <!-- WIN SCREEN -->
-    <div id="win-screen" style="display: none;">
-        <h1>🏆 Galaxy Saved!</h1>
-        <p>Fantastic job, Captain! You recovered all the crystals and mastered regrouping.</p>
-        <button id="restart-btn" onclick="resetGame()">Play Again</button>
+    <!-- VIEW 3: WIN -->
+    <div id="v3" style="display: none;">
+        <h2>🏆 Mission Complete!</h2>
+        <p>The galaxy is safe! Excellent mathematical regrouping, Commander.</p>
+        <button onclick="document.getElementById('v3').style.display='none'; document.getElementById('v1').style.display='block';">Play Again</button>
     </div>
 </div>
 
 <script>
-    const levels = [
-        {
-            title: "Sector 1: The Nebula Network",
-            story: "A stranded explorer ship started with 52 units of crystal power. The Scrappers took 27 units. How much power is left?",
-            top: 52,
-            bottom: 27,
-            ans: 25
-        },
-        {
-            title: "Sector 2: Asteroid Alley",
-            story: "Your radar shows 41 hyper-drive engines online. A solar flare knocks out 18 of them. How many engines are still working?",
-            top: 41,
-            bottom: 18,
-            ans: 23
-        },
-        {
-            title: "Sector 3: The Alien Mothership",
-            story: "The Alien Scrappers have 63 containment fields protecting the core. You disrupt 39 fields. How many fields remain standing?",
-            top: 63,
-            bottom: 39,
-            ans: 24
-        }
+    const data = [
+        {t: "Sector 1", s: "A ship has 52 power crystals. The Scrappers take 27. How many are left?", a: 52, b: 27, r: 25},
+        {t: "Sector 2", s: "You have 41 hyper-drives. A solar flare fries 18. How many work?", a: 41, b: 18, r: 23},
+        {t: "Sector 3", s: "The alien shield has 63 layers. You burst 39. How many are left?", a: 63, b: 39, r: 24}
     ];
 
-    let currentLevel = 0;
-    let visualTens = 0;
-    let visualOnes = 0;
-    let hasRegrouped = false;
+    let idx = 0, tens = 0, ones = 0, doneTrade = false;
 
-    function changeScreen(screenId) {
-        document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'none';
-        document.getElementById('win-screen').style.display = 'none';
-        
-        document.getElementById(screenId).style.display = 'block';
+    function loadMission() {
+        let m = data[idx];
+        document.getElementById("title").innerText = m.t;
+        document.getElementById("story").innerText = m.s;
+        document.getElementById("num1").innerText = m.a;
+        document.getElementById("num2").innerText = m.b;
+        document.getElementById("ans").value = "";
+        document.getElementById("feed").innerText = "";
+        document.getElementById("trade-btn").style.display = "inline-block";
+
+        tens = Math.floor(m.a / 10);
+        ones = m.a % 10;
+        doneTrade = false;
+        draw();
     }
 
-    function startGame() {
-        currentLevel = 0;
-        changeScreen('game-screen');
-        loadLevel();
+    function draw() {
+        let ta = document.getElementById("t-area"), oa = document.getElementById("o-area");
+        ta.innerHTML = ""; oa.innerHTML = "";
+        for(let i=0; i<tens; i++) ta.innerHTML += '<div class="rod"></div>';
+        for(let i=0; i<ones; i++) oa.innerHTML += '<div class="cube"></div>';
     }
 
-    function loadLevel() {
-        const lvl = levels[currentLevel];
-        document.getElementById('sector-title').innerText = lvl.title;
-        document.getElementById('story-text').innerText = lvl.story;
-        document.getElementById('math-top').innerText = lvl.top;
-        document.getElementById('math-bottom').innerText = lvl.bottom;
-        document.getElementById('user-answer').value = '';
-        document.getElementById('feedback-msg').innerText = '';
-        
-        visualTens = Math.floor(lvl.top / 10);
-        visualOnes = lvl.top % 10;
-        hasRegrouped = false;
-        document.getElementById('regroup-btn').style.display = 'inline-block';
-        
-        renderBlocks();
-    }
-
-    function renderBlocks() {
-        const tensDisplay = document.getElementById('tens-display');
-        const onesDisplay = document.getElementById('ones-display');
-        tensDisplay.innerHTML = '';
-        onesDisplay.innerHTML = '';
-
-        for (let i = 0; i < visualTens; i++) {
-            const rod = document.createElement('div');
-            rod.className = 'ten-rod';
-            tensDisplay.appendChild(rod);
-        }
-
-        for (let i = 0; i < visualOnes; i++) {
-            const cube = document.createElement('div');
-            cube.className = 'one-cube';
-            onesDisplay.appendChild(cube);
+    function tradeTen() {
+        if(tens > 0 && !doneTrade) {
+            tens--; ones += 10; doneTrade = true;
+            document.getElementById("trade-btn").style.display = "none";
+            draw();
+            document.getElementById("feed").style.color = "#00ff66";
+            document.getElementById("feed").innerText = "⚡ Traded 1 Ten for 10 Ones!";
         }
     }
 
-    function regroupTens() {
-        if (visualTens > 0 && !hasRegrouped) {
-            visualTens -= 1;
-            visualOnes += 10;
-            hasRegrouped = true;
-            document.getElementById('regroup-btn').style.display = 'none';
-            renderBlocks();
-            
-            const msg = document.getElementById('feedback-msg');
-            msg.className = "feedback success";
-            msg.innerText = "⚡ ZAP! Traded 1 Ten for 10 Ones! Look at all those extra cubes!";
-        }
-    }
+    function verifyAnswer() {
+        let input = parseInt(document.getElementById("ans").value);
+        let f = document.getElementById("feed");
+        if(isNaN(input)) { f.style.color = "red"; f.innerText = "Please type a number."; return; }
 
-    function checkAnswer() {
-        const userAns = parseInt(document.getElementById('user-answer').value);
-        const correctAns = levels[currentLevel].ans;
-        const msg = document.getElementById('feedback-msg');
-
-        if (isNaN(userAns)) {
-            msg.className = "feedback error";
-            msg.innerText = "Enter a code number to fire the blasters!";
-            return;
-        }
-
-        if (userAns === correctAns) {
-            msg.className = "feedback success";
-            msg.innerText = "🎯 Direct hit! Your calculation is perfectly correct!";
-            
+        if(input === data[idx].r) {
+            f.style.color = "#00ff66"; f.innerText = "🎯 Correct! Jumping to hyperspace...";
             setTimeout(() => {
-                currentLevel++;
-                if (currentLevel < levels.length) {
-                    loadLevel();
-                } else {
-                    changeScreen('win-screen');
-                }
-            }, 1800);
+                idx++;
+                if(idx < data.length) { loadMission(); } 
+                else { document.getElementById("v2").style.display = "none"; document.getElementById("v3").style.display = "block"; idx = 0; }
+            }, 1500);
         } else {
+            f.style.color = "red";
+            f.innerText = !doneTrade ? "Try trading 1 Ten for 10 Ones first!" : "Incorrect calculation. Try again!";
+        }
+    }
+</script>
+</body>
+</html>
+</html>
