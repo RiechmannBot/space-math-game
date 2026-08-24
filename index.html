@@ -232,7 +232,7 @@
     </div>
 
     <div id="v2" class="view-pane" style="display: none;">
-        <h2 id="title" style="color: #00f2ff; margin: 0;">Sector 1</h2>
+        <h2 id="title" style="color: #00f2ff; margin: 0;">Stage 1 - Sector 1</h2>
         <div class="grid-layout">
             <div class="sidebar">
                 <div style="font-size: 11px; font-weight: bold; color: #ff007f; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px dashed rgba(255,0,127,0.4); padding-bottom: 4px;">Mission Protocol</div>
@@ -245,7 +245,7 @@
                 <p id="story" style="font-size: 13px; color: #fff; min-height: 60px; text-align: left; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; margin-bottom: 0;"></p>
                 <div class="math-terminal">
                     <div id="num1">0</div>
-                    <div style="color: #ff007f;">-<span id="num2">0</span></div>
+                    <div style="color: #ff007f;"><span id="math-op">-</span><span id="num2">0</span></div>
                 </div>
                 <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px; margin-top: auto; border: 1px solid #555;">🗑️ Reset Collectors</button>
             </div>
@@ -283,32 +283,107 @@
 
     <div id="v3" class="view-pane" style="display: none;">
         <h1 style="color: #00ff66;">🏆 Mission Accomplished!</h1>
-        <p>Excellent calculation work, Captain! All target sectors are cleared and your math matrix is online.</p>
+        <p>Outstanding flying, Captain! All 3 stages and all 9 sectors are cleared. The fleet is fully charged and ready for action!</p>
         <button onclick="resetGame()">Restart Mission Base</button>
     </div>
 </div>
 <script>
+    let currentStage = 1;
     let currentSector = 1;
     let topNumber = 0, bottomNumber = 0, correctSolution = 0;
+    let currentOperator = "-";
     let countTens = 0, countOnes = 0;
     let smokeInterval = null;
 
-    const spaceStories = [
-        "A starship logs [A] cargo plasma canisters. Scrappers tractor-beamed out [B] canisters. How many containers are left?",
-        "Your matrix scans [A] core engine rods online. An asteroid collision fries [B] rods completely. How many pins still run?",
-        "The base protective wall uses [A] magnetic shield layers. Alien laser beams drop [B] layers. How many layers stay up?"
-    ];
-
     function generateRandomProblem() {
-        topNumber = Math.floor(Math.random() * 56) + 40;
-        let topOnes = topNumber % 10;
-        let bottomOnes = Math.floor(Math.random() * (9 - (topOnes + 1) + 1)) + (topOnes + 1);
-        let bottomTens = Math.floor(Math.random() * (Math.floor(topNumber / 10) - 1)) + 1;
-        bottomNumber = (bottomTens * 10) + bottomOnes;
-        correctSolution = topNumber - bottomNumber;
+        if (currentStage === 1) {
+            // Stage 1: Place Value & Expanded Form (10 to 99)
+            let tens = Math.floor(Math.random() * 9) + 1; // 1-9
+            let ones = Math.floor(Math.random() * 9) + 1; // 1-9
+            topNumber = tens * 10;
+            bottomNumber = ones;
+            currentOperator = "+";
+            correctSolution = topNumber + bottomNumber;
+        } else if (currentStage === 2) {
+            // Stage 2: Addition & Subtraction within 20
+            let isAddition = Math.random() > 0.5;
+            if (isAddition) {
+                topNumber = Math.floor(Math.random() * 11) + 4; // 4 to 14
+                bottomNumber = Math.floor(Math.random() * (20 - topNumber)) + 1;
+                currentOperator = "+";
+                correctSolution = topNumber + bottomNumber;
+            } else {
+                topNumber = Math.floor(Math.random() * 11) + 10; // 10 to 20
+                bottomNumber = Math.floor(Math.random() * (topNumber - 1)) + 1;
+                currentOperator = "-";
+                correctSolution = topNumber - bottomNumber;
+            }
+        } else if (currentStage === 3) {
+            // Stage 3: Adding and Subtracting Multiples of 10 (10 to 90)
+            let isAddition = Math.random() > 0.5;
+            if (isAddition) {
+                let t1 = Math.floor(Math.random() * 5) + 1; // 1-5
+                let t2 = Math.floor(Math.random() * (9 - t1)) + 1;
+                topNumber = t1 * 10;
+                bottomNumber = t2 * 10;
+                currentOperator = "+";
+                correctSolution = topNumber + bottomNumber;
+            } else {
+                let t1 = Math.floor(Math.random() * 7) + 3; // 3-9
+                let t2 = Math.floor(Math.random() * (t1 - 1)) + 1;
+                topNumber = t1 * 10;
+                bottomNumber = t2 * 10;
+                currentOperator = "-";
+                correctSolution = topNumber - bottomNumber;
+            }
+        }
+    }
+
+    function getStoryText() {
+        if (currentStage === 1) {
+            const s1Stories = [
+                "Combine [A] power cells with [B] extra booster crystals. What is the full fleet power?",
+                "Command logs [A] main engine rods and [B] scout pins. How much fuel is ready?",
+                "Radar spots [A] shields on the base and [B] auxiliary shields. Find total shields."
+            ];
+            return s1Stories[(currentSector - 1) % s1Stories.length];
+        } else if (currentStage === 2) {
+            if (currentOperator === "+") {
+                const s2Add = [
+                    "A squad has [A] fighter ships. [B] reinforcements arrive. How many ships are ready?",
+                    "You collect [A] energy cells from Orbit Alpha and [B] cells from Orbit Beta. What is the sum?",
+                    "Matrix scans [A] beacon satellites. Captain deploys [B] more. How many beacons shine?"
+                ];
+                return s2Add[(currentSector - 1) % s2Add.length];
+            } else {
+                const s2Sub = [
+                    "A transport carries [A] plasma pods. Scrappers steal [B] pods. How many remain?",
+                    "Your shield had [A] charge units. Meteor impacts absorb [B] units. How much charge is left?",
+                    "Fleet launched [A] rescue probes. [B] probes completed their run. How many are still out?"
+                ];
+                return s2Sub[(currentSector - 1) % s2Sub.length];
+            }
+        } else {
+            if (currentOperator === "+") {
+                const s3Add = [
+                    "Reactor core has [A] mega-watts online. Grid injects [B] mega-watts. What is total output?",
+                    "Cruiser docks [A] supply pods. Freighter brings [B] more pods. What is the new total?",
+                    "Station solar bank adds [A] power units to [B] reserve units. Calculate total power."
+                ];
+                return s3Add[(currentSector - 1) % s3Add.length];
+            } else {
+                const s3Sub = [
+                    "Station storage has [A] fuel canisters. Long-range jump uses [B] canisters. How many are left?",
+                    "Deflector grid had [A] photon pins active. Ion storm disables [B] pins. How many pins stay on?",
+                    "Base holds [A] repair robots. Mission deploys [B] robots to deep space. How many remain?"
+                ];
+                return s3Sub[(currentSector - 1) % s3Sub.length];
+            }
+        }
     }
 
     function startGame() {
+        currentStage = 1;
         currentSector = 1;
         document.getElementById('v1').style.display = 'none';
         document.getElementById('v3').style.display = 'none';
@@ -318,10 +393,11 @@
 
     function loadMission() {
         generateRandomProblem();
-        document.getElementById("title").innerText = "Sector " + currentSector + ": Navigation Node";
-        let storyStr = spaceStories[(currentSector - 1) % spaceStories.length];
+        document.getElementById("title").innerText = "Stage " + currentStage + " - Sector " + currentSector + ": Navigation Node";
+        let storyStr = getStoryText();
         document.getElementById("story").innerText = storyStr.replace("[A]", topNumber).replace("[B]", bottomNumber);
         document.getElementById("num1").innerText = topNumber;
+        document.getElementById("math-op").innerText = currentOperator;
         document.getElementById("num2").innerText = bottomNumber;
         clearBins();
     }
@@ -374,7 +450,6 @@
         document.getElementById("ones-count").innerText = countOnes;
     }
 
-    /* REPAIRED: Safe, high-performance looping engine that flushes items one-by-one correctly */
     function clearBins() {
         let binTens = document.getElementById("tens-bin");
         let rods = binTens.getElementsByClassName("token-rod");
@@ -475,8 +550,17 @@
             setTimeout(() => {
                 playRewardAnimation(() => {
                     currentSector++;
-                    if(currentSector <= 3) { loadMission(); } 
-                    else { document.getElementById("v2").style.display = "none"; document.getElementById("v3").style.display = "block"; }
+                    if (currentSector > 3) {
+                        currentSector = 1;
+                        currentStage++;
+                    }
+                    
+                    if (currentStage <= 3) {
+                        loadMission();
+                    } else {
+                        document.getElementById("v2").style.display = "none";
+                        document.getElementById("v3").style.display = "block";
+                    }
                 });
             }, 800);
         } else {
