@@ -40,14 +40,6 @@
             text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
         }
 
-        .screen {
-            display: none;
-        }
-
-        .active {
-            display: block !important;
-        }
-
         button {
             background: transparent;
             color: var(--text-color);
@@ -155,16 +147,16 @@
 
 <div id="game-container">
     <!-- START SCREEN -->
-    <div id="start-screen" class="screen active">
+    <div id="start-screen" style="display: block;">
         <h1>🚀 Space Rescue Academy</h1>
         <p>Welcome, Cadet! Alien Scrappers have stolen fuel crystals from our fleet.</p>
         <p>We need to calculate our remaining power levels to make the jump to hyperspace!</p>
         <p><strong>Your Mission Trick:</strong> If there are more ones on the floor, go next door and break a Ten Rod down!</p>
-        <button id="launch-btn">Launch Mission</button>
+        <button id="launch-btn" onclick="startGame()">Launch Mission</button>
     </div>
 
     <!-- GAMEPLAY SCREEN -->
-    <div id="game-screen" class="screen">
+    <div id="game-screen" style="display: none;">
         <h2 id="sector-title">Sector 1</h2>
         <p id="story-text">Loading...</p>
 
@@ -179,7 +171,7 @@
             </div>
         </div>
 
-        <button id="regroup-btn" style="border-color: #ffcc00; font-size: 14px; padding: 6px 12px;">🔄 Trade 1 Ten for 10 Ones</button>
+        <button id="regroup-btn" onclick="regroupTens()" style="border-color: #ffcc00; font-size: 14px; padding: 6px 12px;">🔄 Trade 1 Ten for 10 Ones</button>
 
         <div class="math-box">
             <div id="math-top">0</div>
@@ -189,19 +181,18 @@
         </div>
 
         <div id="feedback-msg" class="feedback"></div>
-        <button id="submit-btn">Submit Calculation</button>
+        <button id="submit-btn" onclick="checkAnswer()">Submit Calculation</button>
     </div>
 
     <!-- WIN SCREEN -->
-    <div id="win-screen" class="screen">
+    <div id="win-screen" style="display: none;">
         <h1>🏆 Galaxy Saved!</h1>
         <p>Fantastic job, Captain! You recovered all the crystals and mastered regrouping.</p>
-        <button id="restart-btn">Play Again</button>
+        <button id="restart-btn" onclick="resetGame()">Play Again</button>
     </div>
 </div>
 
 <script>
-    // Game Levels Setup
     const levels = [
         {
             title: "Sector 1: The Nebula Network",
@@ -231,17 +222,12 @@
     let visualOnes = 0;
     let hasRegrouped = false;
 
-    // Attach Event Listeners cleanly after page load
-    document.getElementById('launch-btn').addEventListener('click', startGame);
-    document.getElementById('regroup-btn').addEventListener('click', regroupTens);
-    document.getElementById('submit-btn').addEventListener('click', checkAnswer);
-    document.getElementById('restart-btn').addEventListener('click', resetGame);
-
     function changeScreen(screenId) {
-        document.getElementById('start-screen').classList.remove('active');
-        document.getElementById('game-screen').classList.remove('active');
-        document.getElementById('win-screen').classList.remove('active');
-        document.getElementById(screenId).classList.add('active');
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'none';
+        document.getElementById('win-screen').style.display = 'none';
+        
+        document.getElementById(screenId).style.display = 'block';
     }
 
     function startGame() {
@@ -312,3 +298,15 @@
         }
 
         if (userAns === correctAns) {
+            msg.className = "feedback success";
+            msg.innerText = "🎯 Direct hit! Your calculation is perfectly correct!";
+            
+            setTimeout(() => {
+                currentLevel++;
+                if (currentLevel < levels.length) {
+                    loadLevel();
+                } else {
+                    changeScreen('win-screen');
+                }
+            }, 1800);
+        } else {
