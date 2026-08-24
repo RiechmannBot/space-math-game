@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Rescue: Tactile Command Console</title>
     <style>
+        :root {
+            --flame-scale: 1;
+            --flame-thick: 1;
+        }
         @keyframes moveStars {
             from { background-position: 0 0; }
             to { background-position: 0 1000px; }
@@ -133,78 +137,75 @@
             height: 24px;
             background: linear-gradient(#00ff66, #00993d);
         }
+        .math-terminal { 
+            font-size: 40px; font-family: monospace; font-weight: bold; background: #000; 
+            padding: 10px; border-radius: 8px; text-align: right; border-bottom: 4px solid white;
+            letter-spacing: 4px; width: 140px; margin: 15px auto;
+        }
+        button { 
+            background: linear-gradient(135deg, #ff007f, #b30059); 
+            color: white; border: none; padding: 12px 24px; font-size: 16px; 
+            font-weight: bold; border-radius: 50px; cursor: pointer; margin: 5px; 
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4); transition: transform 0.2s;
+        }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff007f; }
+        
+        #reward-stage { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020208; z-index: 9999; }
+        .warp-lines { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px); background-size: 100% 100%, 40px 100%; opacity: 0; }
+        .rocket-sprite { position: absolute; width: 150px; z-index: 100; }
+        .screen-flash { position: absolute; width:100%; height:100%; background: #00f2ff; opacity: 0; pointer-events: none; }
+        .hud-overlay { position: absolute; top: 15%; left: 0; width: 100%; color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace; text-shadow: 0 0 10px #00ff66; letter-spacing: 2px; }
+
+        .rocket-horizontal { left: -180px; top: 45%; }
+        @keyframes dynamicFlyHorizontal {
+            0% { left: -180px; transform: scale(0.7); }
+            30% { left: calc(50% - 75px); transform: scale(1.1); }
+            60% { left: calc(50% - 75px); transform: scale(1.1); }
+            65% { left: calc(50% - 85px); transform: scale(1.15); }
+            100% { left: 120vw; transform: scale(1.6); }
+        }
+        @keyframes engineThrottleHorizontal {
+            0% { transform: scaleX(calc(0.5 * var(--flame-scale, 1))); opacity: 0.5; }
+            59% { transform: scaleX(calc(0.6 * var(--flame-scale, 1))); opacity: 0.7; }
+            60% { transform: scaleX(calc(3.5 * var(--flame-scale, 1))) scaleY(calc(1.8 * var(--flame-thick, 1))); fill: #00f2ff; filter: drop-shadow(0 0 15px #00f2ff); opacity: 1; }
+            100% { transform: scaleX(calc(2.5 * var(--flame-scale, 1))) scaleY(calc(1.2 * var(--flame-thick, 1))); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
+        }
+
+        .rocket-vertical { left: calc(50% - 75px); top: 110vh; }
+        @keyframes dynamicFlyVertical {
+            0% { top: 110vh; transform: scale(0.7) rotate(-90deg); }
+            30% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
+            60% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
+            65% { top: calc(50% - 65px); transform: scale(1.15) rotate(-90deg); }
+            100% { top: -150vh; transform: scale(1.8) rotate(-90deg); }
+        }
+        @keyframes engineThrottleVertical {
+            0% { transform: scaleX(calc(0.5 * var(--flame-scale, 1))); opacity: 0.5; }
+            59% { transform: scaleX(calc(0.6 * var(--flame-scale, 1))); opacity: 0.7; }
+            60% { transform: scaleX(calc(4.5 * var(--flame-scale, 1))) scaleY(calc(2.2 * var(--flame-thick, 1))); fill: #ffe600; filter: drop-shadow(0 0 20px #ffe600); opacity: 1; }
+            100% { transform: scaleX(calc(3.0 * var(--flame-scale, 1))) scaleY(calc(1.4 * var(--flame-thick, 1))); fill: #ff3300; filter: drop-shadow(0 0 30px #ff3300); opacity: 1; }
+        }
+
+        .trail-particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(200,200,220,0.7) 0%, rgba(100,100,110,0.3) 50%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 50;
+            animation: billowSmoke 0.8s ease-out forwards;
+        }
+        @keyframes billowSmoke {
+            0% { transform: scale(0.3); opacity: 0.9; filter: blur(2px); }
+            50% { opacity: 0.6; background: radial-gradient(circle, rgba(255,100,0,0.3), rgba(120,120,130,0.2) 50%, transparent); }
+            100% { transform: scale(2.5); opacity: 0; filter: blur(8px); }
+        }
+
+        @keyframes warpDrive { 0% { opacity: 0; background-size: 100% 100%, 10px 100%; } 60% { opacity: 0.3; } 100% { opacity: 1; background-size: 100% 100%, 800px 100%; } }
+        @keyframes flashTrigger { 0% { opacity:0; } 60% { opacity:0; } 62% { opacity:0.25; background:#fff; } 65% { opacity:0.15; background:#00f2ff; } 100% { opacity:0; } }
+
+        .run-warp { animation: warpDrive 3.5s cubic-bezier(0.1, 0.8, 0.1, 1) forwards; }
+        .run-flash { animation: flashTrigger 3.5s ease-out forwards; }
     </style>
-</head>
-<style>
-    .math-terminal { 
-        font-size: 40px; font-family: monospace; font-weight: bold; background: #000; 
-        padding: 10px; border-radius: 8px; text-align: right; border-bottom: 4px solid white;
-        letter-spacing: 4px; width: 140px; margin: 15px auto;
-    }
-    button { 
-        background: linear-gradient(135deg, #ff007f, #b30059); 
-        color: white; border: none; padding: 12px 24px; font-size: 16px; 
-        font-weight: bold; border-radius: 50px; cursor: pointer; margin: 5px; 
-        box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4); transition: transform 0.2s;
-    }
-    button:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff007f; }
-    
-    #reward-stage { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020208; z-index: 9999; }
-    .warp-lines { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px); background-size: 100% 100%, 40px 100%; opacity: 0; }
-    .rocket-sprite { position: absolute; width: 150px; z-index: 100; }
-    .screen-flash { position: absolute; width:100%; height:100%; background: #00f2ff; opacity: 0; pointer-events: none; }
-    .hud-overlay { position: absolute; top: 15%; left: 0; width: 100%; color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace; text-shadow: 0 0 10px #00ff66; letter-spacing: 2px; }
-
-    .rocket-horizontal { left: -180px; top: 45%; }
-    @keyframes dynamicFlyHorizontal {
-        0% { left: -180px; transform: scale(0.7); }
-        30% { left: calc(50% - 75px); transform: scale(1.1); }
-        60% { left: calc(50% - 75px); transform: scale(1.1); }
-        65% { left: calc(50% - 85px); transform: scale(1.15); }
-        100% { left: 120vw; transform: scale(1.6); }
-    }
-    @keyframes engineThrottleHorizontal {
-        0% { transform: scaleX(0.5); opacity: 0.5; }
-        59% { transform: scaleX(0.6); opacity: 0.7; }
-        60% { transform: scaleX(3.5) scaleY(1.8); fill: #00f2ff; filter: drop-shadow(0 0 15px #00f2ff); opacity: 1; }
-        100% { transform: scaleX(2.5) scaleY(1.2); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
-    }
-
-    .rocket-vertical { left: calc(50% - 75px); top: 110vh; }
-    @keyframes dynamicFlyVertical {
-        0% { top: 110vh; transform: scale(0.7) rotate(-90deg); }
-        30% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
-        60% { top: calc(50% - 75px); transform: scale(1.1) rotate(-90deg); }
-        65% { top: calc(50% - 65px); transform: scale(1.15) rotate(-90deg); }
-        100% { top: -150vh; transform: scale(1.8) rotate(-90deg); }
-    }
-    @keyframes engineThrottleVertical {
-        0% { transform: scaleX(0.5); opacity: 0.5; }
-        59% { transform: scaleX(0.6); opacity: 0.7; }
-        60% { transform: scaleX(4.5) scaleY(2.2); fill: #ffe600; filter: drop-shadow(0 0 20px #ffe600); opacity: 1; }
-        100% { transform: scaleX(3.0) scaleY(1.4); fill: #ff3300; filter: drop-shadow(0 0 30px #ff3300); opacity: 1; }
-    }
-
-    .trail-particle {
-        position: absolute;
-        background: radial-gradient(circle, rgba(200,200,220,0.7) 0%, rgba(100,100,110,0.3) 50%, transparent 70%);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 50;
-        animation: billowSmoke 0.8s ease-out forwards;
-    }
-    @keyframes billowSmoke {
-        0% { transform: scale(0.3); opacity: 0.9; filter: blur(2px); }
-        50% { opacity: 0.6; background: radial-gradient(circle, rgba(255,100,0,0.3), rgba(120,120,130,0.2) 50%, transparent); }
-        100% { transform: scale(2.5); opacity: 0; filter: blur(8px); }
-    }
-
-    @keyframes warpDrive { 0% { opacity: 0; background-size: 100% 100%, 10px 100%; } 60% { opacity: 0.3; } 100% { opacity: 1; background-size: 100% 100%, 800px 100%; } }
-    @keyframes flashTrigger { 0% { opacity:0; } 60% { opacity:0; } 62% { opacity:0.25; background:#fff; } 65% { opacity:0.15; background:#00f2ff; } 100% { opacity:0; } }
-
-    .run-warp { animation: warpDrive 3.5s cubic-bezier(0.1, 0.8, 0.1, 1) forwards; }
-    .run-flash { animation: flashTrigger 3.5s ease-out forwards; }
-</style>
 </head>
 <body>
 <div id="reward-stage">
@@ -296,43 +297,49 @@
     let smokeInterval = null;
 
     function generateRandomProblem() {
+        let isAddition = Math.random() > 0.5;
         if (currentStage === 1) {
-            // Stage 1: Place Value & Expanded Form (10 to 99)
-            let tens = Math.floor(Math.random() * 9) + 1; // 1-9
-            let ones = Math.floor(Math.random() * 9) + 1; // 1-9
-            topNumber = tens * 10;
-            bottomNumber = ones;
-            currentOperator = "+";
-            correctSolution = topNumber + bottomNumber;
-        } else if (currentStage === 2) {
-            // Stage 2: Addition & Subtraction within 20
-            let isAddition = Math.random() > 0.5;
+            // Stage 1: Basic addition and subtraction within 10 (Operands and answers <= 10)
             if (isAddition) {
-                topNumber = Math.floor(Math.random() * 11) + 4; // 4 to 14
-                bottomNumber = Math.floor(Math.random() * (20 - topNumber)) + 1;
+                topNumber = Math.floor(Math.random() * 8) + 1; // 1 to 8
+                bottomNumber = Math.floor(Math.random() * (10 - topNumber)) + 1; // Sum <= 10
                 currentOperator = "+";
                 correctSolution = topNumber + bottomNumber;
             } else {
-                topNumber = Math.floor(Math.random() * 11) + 10; // 10 to 20
-                bottomNumber = Math.floor(Math.random() * (topNumber - 1)) + 1;
+                topNumber = Math.floor(Math.random() * 8) + 3; // 3 to 10
+                bottomNumber = Math.floor(Math.random() * (topNumber - 1)) + 1; // 1 to (topNumber - 1)
+                currentOperator = "-";
+                correctSolution = topNumber - bottomNumber;
+            }
+        } else if (currentStage === 2) {
+            // Stage 2: Operations bridging to/from 11-15 (Neither number > 15)
+            if (isAddition) {
+                topNumber = Math.floor(Math.random() * 6) + 5; // 5 to 10
+                let minB = Math.max(1, 11 - topNumber);
+                let maxB = 15 - topNumber;
+                bottomNumber = Math.floor(Math.random() * (maxB - minB + 1)) + minB;
+                currentOperator = "+";
+                correctSolution = topNumber + bottomNumber;
+            } else {
+                topNumber = Math.floor(Math.random() * 5) + 11; // 11 to 15
+                bottomNumber = Math.floor(Math.random() * 8) + 2; // 2 to 9
+                if (bottomNumber >= topNumber) bottomNumber = topNumber - 1;
                 currentOperator = "-";
                 correctSolution = topNumber - bottomNumber;
             }
         } else if (currentStage === 3) {
-            // Stage 3: Adding and Subtracting Multiples of 10 (10 to 90)
-            let isAddition = Math.random() > 0.5;
+            // Stage 3: Operations up to 20 (Sums/Minuends 16 to 20, strictly <= 20)
             if (isAddition) {
-                let t1 = Math.floor(Math.random() * 5) + 1; // 1-5
-                let t2 = Math.floor(Math.random() * (9 - t1)) + 1;
-                topNumber = t1 * 10;
-                bottomNumber = t2 * 10;
+                topNumber = Math.floor(Math.random() * 7) + 7; // 7 to 13
+                let minB = Math.max(1, 16 - topNumber);
+                let maxB = 20 - topNumber;
+                bottomNumber = Math.floor(Math.random() * (maxB - minB + 1)) + minB;
                 currentOperator = "+";
                 correctSolution = topNumber + bottomNumber;
             } else {
-                let t1 = Math.floor(Math.random() * 7) + 3; // 3-9
-                let t2 = Math.floor(Math.random() * (t1 - 1)) + 1;
-                topNumber = t1 * 10;
-                bottomNumber = t2 * 10;
+                topNumber = Math.floor(Math.random() * 5) + 16; // 16 to 20
+                bottomNumber = Math.floor(Math.random() * 9) + 4; // 4 to 12
+                if (bottomNumber >= topNumber) bottomNumber = topNumber - 1;
                 currentOperator = "-";
                 correctSolution = topNumber - bottomNumber;
             }
@@ -341,41 +348,50 @@
 
     function getStoryText() {
         if (currentStage === 1) {
-            const s1Stories = [
-                "Combine [A] power cells with [B] extra booster crystals. What is the full fleet power?",
-                "Command logs [A] main engine rods and [B] scout pins. How much fuel is ready?",
-                "Radar spots [A] shields on the base and [B] auxiliary shields. Find total shields."
-            ];
-            return s1Stories[(currentSector - 1) % s1Stories.length];
+            if (currentOperator === "+") {
+                const s1Add = [
+                    "Scout logs [A] energy cells. Beacon adds [B] cells. How many cells total?",
+                    "Command launches [A] drones. Pilot deploys [B] more. How many drones are flying?",
+                    "Radar detects [A] blue crystals and [B] green crystals. Count the crystals."
+                ];
+                return s1Add[(currentSector - 1) % s1Add.length];
+            } else {
+                const s1Sub = [
+                    "A squad holds [A] shield pins. Scrappers blast [B] pins. How many remain?",
+                    "Your shuttle carried [A] solar panels. Asteroids break [B] panels. How many stay whole?",
+                    "Station logs [A] fuel cans. Thrusters burn [B] cans. How many are left?"
+                ];
+                return s1Sub[(currentSector - 1) % s1Sub.length];
+            }
         } else if (currentStage === 2) {
             if (currentOperator === "+") {
                 const s2Add = [
-                    "A squad has [A] fighter ships. [B] reinforcements arrive. How many ships are ready?",
-                    "You collect [A] energy cells from Orbit Alpha and [B] cells from Orbit Beta. What is the sum?",
-                    "Matrix scans [A] beacon satellites. Captain deploys [B] more. How many beacons shine?"
+                    "Squad Alpha has [A] ships. Squad Beta sends [B] ships. How many ships are ready?",
+                    "You collect [A] plasma pods from Orbit 1 and [B] pods from Orbit 2. Find the sum.",
+                    "Fleet scans [A] defense beacons. Patrol activates [B] more. How many shine?"
                 ];
                 return s2Add[(currentSector - 1) % s2Add.length];
             } else {
                 const s2Sub = [
-                    "A transport carries [A] plasma pods. Scrappers steal [B] pods. How many remain?",
-                    "Your shield had [A] charge units. Meteor impacts absorb [B] units. How much charge is left?",
-                    "Fleet launched [A] rescue probes. [B] probes completed their run. How many are still out?"
+                    "Cargo holds [A] plasma containers. Jump sequence uses [B] containers. How many remain?",
+                    "Deflector has [A] power bars. Space dust absorbs [B] bars. What power is left?",
+                    "Base launched [A] rescue probes. [B] probes completed missions. How many remain out?"
                 ];
                 return s2Sub[(currentSector - 1) % s2Sub.length];
             }
         } else {
             if (currentOperator === "+") {
                 const s3Add = [
-                    "Reactor core has [A] mega-watts online. Grid injects [B] mega-watts. What is total output?",
-                    "Cruiser docks [A] supply pods. Freighter brings [B] more pods. What is the new total?",
-                    "Station solar bank adds [A] power units to [B] reserve units. Calculate total power."
+                    "Command grid routes [A] mega-watts to [B] auxiliary watts. What is total energy?",
+                    "Cruiser docks [A] fuel rods. Supply ship transfers [B] rods. How many in storage?",
+                    "Orbital station links [A] solar nodes with [B] reactor nodes. Calculate total nodes."
                 ];
                 return s3Add[(currentSector - 1) % s3Add.length];
             } else {
                 const s3Sub = [
-                    "Station storage has [A] fuel canisters. Long-range jump uses [B] canisters. How many are left?",
-                    "Deflector grid had [A] photon pins active. Ion storm disables [B] pins. How many pins stay on?",
-                    "Base holds [A] repair robots. Mission deploys [B] robots to deep space. How many remain?"
+                    "Fleet storage has [A] antimatter cores. Warp jump consumes [B] cores. How many left?",
+                    "Main grid active with [A] shield relays. Ion cloud knocks out [B] relays. How many stay up?",
+                    "Hangar holds [A] starfighters. Mission deploys [B] fighters into orbit. How many stay?"
                 ];
                 return s3Sub[(currentSector - 1) % s3Sub.length];
             }
@@ -495,6 +511,13 @@
         const flame = document.getElementById('booster-flame');
         const hud = document.getElementById('hud-alert');
 
+        // Dynamic Flame Scaling based on total completed sectors (1 to 9)
+        let totalCompletedIndex = ((currentStage - 1) * 3) + currentSector;
+        let flameScale = 1 + (totalCompletedIndex * 0.32);
+        let flameThick = 1 + (totalCompletedIndex * 0.08);
+        document.documentElement.style.setProperty('--flame-scale', flameScale);
+        document.documentElement.style.setProperty('--flame-thick', flameThick);
+
         stage.style.display = 'block';
         flash.className = 'screen-flash run-flash';
         warp.className = 'warp-lines run-warp';
@@ -570,6 +593,8 @@
     }
 
     function resetGame() {
+        document.documentElement.style.setProperty('--flame-scale', 1);
+        document.documentElement.style.setProperty('--flame-thick', 1);
         document.getElementById('v3').style.display = 'none';
         document.getElementById('v2').style.display = 'none';
         document.getElementById('v1').style.display = 'block';
