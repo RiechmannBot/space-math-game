@@ -149,10 +149,7 @@
         #reward-stage { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #020208; z-index: 9999; }
         .warp-lines { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(circle, transparent 20%, #020208 70%), linear-gradient(90deg, rgba(0,242,255,0.1) 1px, transparent 1px); background-size: 100% 100%, 40px 100%; opacity: 0; }
         .rocket-sprite { position: absolute; left: -180px; top: 45%; width: 150px; }
-        
-        /* FIXED: Soft energy flash overlay (subtle 0.25 max opacity so it doesn't mask the rocket) */
         .screen-flash { position: absolute; width:100%; height:100%; background: #00f2ff; opacity: 0; pointer-events: none; }
-        
         .hud-overlay { position: absolute; top: 15%; left: 0; width: 100%; color: #00ff66; font-size: 24px; font-weight: bold; font-family: monospace; text-shadow: 0 0 10px #00ff66; letter-spacing: 2px; }
 
         @keyframes dynamicFly {
@@ -169,8 +166,6 @@
             100% { transform: scaleX(2.5) scaleY(1.2); fill: #ff007f; filter: drop-shadow(0 0 25px #ff007f); opacity: 1; }
         }
         @keyframes warpDrive { 0% { opacity: 0; background-size: 100% 100%, 10px 100%; } 60% { opacity: 0.3; } 100% { opacity: 1; background-size: 100% 100%, 800px 100%; } }
-        
-        /* FIXED: Toned down flash intensity and synchronized perfectly with launch window acceleration */
         @keyframes flashTrigger { 0% { opacity:0; } 60% { opacity:0; } 62% { opacity:0.25; background:#fff; } 65% { opacity:0.15; background:#00f2ff; } 100% { opacity:0; } }
 
         .run-warp { animation: warpDrive 3.5s cubic-bezier(0.1, 0.8, 0.1, 1) forwards; }
@@ -227,7 +222,8 @@
                     <div style="color: #ff007f;">-<span id="num2">0</span></div>
                 </div>
                 
-                <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px; margin-top: auto;">🗑️ Reset Bins</button>
+                <!-- FIXED: Label text dynamically updated to link with your collector terminals -->
+                <button onclick="clearBins()" style="background: #333; font-size: 12px; padding: 6px 14px; margin-top: auto; border: 1px solid #555;">🗑️ Reset Collectors</button>
             </div>
 
             <!-- Right Side: Interactive Drag Stations -->
@@ -243,7 +239,7 @@
                     </div>
                 </div>
 
-                <!-- Drop Targets -->
+                <!-- Drop Boxes -->
                 <div class="bin-row">
                     <div id="tens-bin" class="collector-bin" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, 'tens')">
                         <div class="bin-label" style="color:#ffe600;">TENS COLLECTOR</div>
@@ -278,7 +274,7 @@
     let countTens = 0, countOnes = 0;
 
     const spaceStories = [
-        "A starship logs [A] cargo plasma canisters. Scrappers tractor-beam out [B] canisters. How many containers are left?",
+        "A starship logs [A] cargo plasma canisters. Scrappers tractor-beamed out [B] canisters. How many containers are left?",
         "Your matrix scans [A] core engine rods online. An asteroid collision fries [B] rods completely. How many pins still run?",
         "The base protective wall uses [A] magnetic shield layers. Alien laser beams drop [B] layers. How many layers stay up?"
     ];
@@ -374,14 +370,15 @@
         document.getElementById("ones-count").innerText = countOnes;
     }
 
+    /* FIXED: Rewritten clear loop engine to correctly isolate and erase block child nodes */
     function clearBins() {
         let binTens = document.getElementById("tens-bin");
         let rods = binTens.getElementsByClassName("token-rod");
-        while(rods.length > 0) { rods.remove(); }
+        while(rods.length > 0) { rods[0].remove(); }
         
         let binOnes = document.getElementById("ones-bin");
         let cubes = binOnes.getElementsByClassName("token-cube");
-        while(cubes.length > 0) { cubes.remove(); }
+        while(cubes.length > 0) { cubes[0].remove(); }
         
         document.getElementById("feed").innerText = "";
         updateCounters();
