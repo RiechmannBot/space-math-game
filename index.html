@@ -308,6 +308,68 @@
     let currentOperator = "-";
     let countTens = 0, countOnes = 0;
     let smokeInterval = null;
+    let audioCtx = null;
+
+    function getAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        return audioCtx;
+    }
+
+    function playOnesSound() {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(2400, now + 0.04);
+        osc.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
+        
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.1);
+    }
+
+    function playTensSound() {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(320, now);
+        osc1.frequency.exponentialRampToValueAtTime(140, now + 0.12);
+        
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(160, now);
+        osc2.frequency.exponentialRampToValueAtTime(70, now + 0.28);
+        
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.28);
+        osc2.stop(now + 0.28);
+    }
 
     function generateRandomProblem() {
         let isAddition = Math.random() > 0.5;
@@ -412,6 +474,7 @@
     }
 
     function startGame() {
+        getAudioContext();
         currentStage = 1;
         currentSector = 1;
         document.getElementById('v1').style.display = 'none';
@@ -434,7 +497,7 @@
     function triggerOnesOverloadWarning() {
         const onesBin = document.getElementById("ones-bin");
         onesBin.classList.remove('warning-flash');
-        void onesBin.offsetWidth; // Force CSS reflow to re-trigger pulse
+        void onesBin.offsetWidth;
         onesBin.classList.add('warning-flash');
         
         const f = document.getElementById("feed");
@@ -443,6 +506,7 @@
     }
 
     function addTensRod() {
+        playTensSound();
         let clonedRod = document.createElement("div");
         clonedRod.className = "token token-rod";
         clonedRod.onclick = function() { this.remove(); updateCounters(); };
@@ -456,6 +520,7 @@
             triggerOnesOverloadWarning();
             return;
         }
+        playOnesSound();
         let clonedCube = document.createElement("div");
         clonedCube.className = "token token-cube";
         clonedCube.onclick = function() { 
@@ -483,7 +548,6 @@
         }
     }
 
-    // Click and Touch Listeners for Supply Shelf Items
     const sourceRodElem = document.getElementById("source-rod");
     const sourceCubeElem = document.getElementById("source-cube");
 
