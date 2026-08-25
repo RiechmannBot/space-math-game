@@ -94,10 +94,18 @@
             justify-content: center;
             overflow-y: auto;
             position: relative;
-            transition: background 0.2s;
+            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
         }
         .collector-bin.drag-over {
             background: rgba(0, 242, 255, 0.2);
+        }
+        @keyframes binWarningPulse {
+            0% { border-color: #ff3300; background: rgba(255, 51, 0, 0.35); box-shadow: 0 0 25px #ff3300; }
+            50% { border-color: #ffe600; background: rgba(255, 230, 0, 0.25); box-shadow: 0 0 15px #ffe600; }
+            100% { border-color: #ff3300; background: rgba(255, 51, 0, 0.35); box-shadow: 0 0 25px #ff3300; }
+        }
+        .collector-bin.warning-flash {
+            animation: binWarningPulse 0.35s ease-in-out 2;
         }
         .bin-label {
             position: absolute;
@@ -421,6 +429,17 @@
         clearBins();
     }
 
+    function triggerOnesOverloadWarning() {
+        const onesBin = document.getElementById("ones-bin");
+        onesBin.classList.remove('warning-flash');
+        void onesBin.offsetWidth; // Force CSS reflow to re-trigger pulse
+        onesBin.classList.add('warning-flash');
+        
+        const f = document.getElementById("feed");
+        f.style.color = "#ffe600";
+        f.innerText = "⚠️ ONES BAY OVERLOAD! Protocol limit is 9 cubes. Bundle 10 ones into 1 Tens Fuel Rod!";
+    }
+
     function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('drag-over'); }
     function leaveDrop(ev) { ev.currentTarget.classList.remove('drag-over'); }
     function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
@@ -435,9 +454,19 @@
             clonedRod.onclick = function() { this.remove(); updateCounters(); };
             document.getElementById("tens-bin").appendChild(clonedRod);
         } else if (id === "source-cube" && binType === "ones") {
+            let currentCubes = document.getElementById("ones-bin").getElementsByClassName("token-cube").length;
+            if (currentCubes >= 9) {
+                triggerOnesOverloadWarning();
+                return;
+            }
             let clonedCube = document.createElement("div");
             clonedCube.className = "token token-cube";
-            clonedCube.onclick = function() { this.remove(); updateCounters(); };
+            clonedCube.onclick = function() { 
+                this.remove(); 
+                updateCounters(); 
+                let f = document.getElementById("feed");
+                if (f.innerText.includes("ONES BAY OVERLOAD")) { f.innerText = ""; }
+            };
             document.getElementById("ones-bin").appendChild(clonedCube);
         }
         updateCounters();
@@ -455,9 +484,19 @@
     }
 
     function handleMobileTapThrustOnes(e) {
+        let currentCubes = document.getElementById("ones-bin").getElementsByClassName("token-cube").length;
+        if (currentCubes >= 9) {
+            triggerOnesOverloadWarning();
+            return;
+        }
         let clonedCube = document.createElement("div");
         clonedCube.className = "token token-cube";
-        clonedCube.onclick = function() { this.remove(); updateCounters(); };
+        clonedCube.onclick = function() { 
+            this.remove(); 
+            updateCounters(); 
+            let f = document.getElementById("feed");
+            if (f.innerText.includes("ONES BAY OVERLOAD")) { f.innerText = ""; }
+        };
         document.getElementById("ones-bin").appendChild(clonedCube);
         updateCounters();
     }
@@ -482,6 +521,7 @@
             cubes[0].parentNode.removeChild(cubes[0]); 
         }
         
+        document.getElementById("ones-bin").classList.remove('warning-flash');
         document.getElementById("feed").innerText = "";
         updateCounters();
     }
