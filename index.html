@@ -123,14 +123,16 @@
             margin-top: 5px;
         }
         .token {
-            cursor: grab;
+            cursor: pointer;
             border: 1px solid #fff;
             border-radius: 4px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
             display: inline-block;
             touch-action: none;
+            transition: transform 0.1s;
         }
-        .token:active { cursor: grabbing; }
+        .token:hover { transform: scale(1.08); }
+        .token:active { transform: scale(0.95); }
         .token-rod {
             width: 20px;
             height: 70px;
@@ -239,7 +241,7 @@
     <div id="v1" class="view-pane" style="display: block;">
         <h1>🚀 Space Rescue Academy</h1>
         <p>Alien Scrappers stole our fleet's power crystals! Let's initialize target collectors using dynamic fuel pins.</p>
-        <p><strong>How to build answers:</strong> Drag Tens Rods and Ones Cubes from the shelf and drop them into the target collectors!</p>
+        <p><strong>How to build answers:</strong> Click or Drag Tens Rods and Ones Cubes into the target collectors!</p>
         <button onclick="startGame()">Launch Command Console</button>
     </div>
 
@@ -250,7 +252,7 @@
                 <div style="font-size: 11px; font-weight: bold; color: #ff007f; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px dashed rgba(255,0,127,0.4); padding-bottom: 4px;">Mission Protocol</div>
                 <div style="font-size: 12px; color: #aaa; text-align: left; margin: 8px 0; line-height: 1.4;">
                     1. Solve the math card.<br>
-                    2. Drag fuel rods into bins to match your answer columns.<br>
+                    2. Click or Drag fuel into bins to match your answer.<br>
                     3. Click any inside item to erase it.<br>
                     4. Fire engines when ready!
                 </div>
@@ -440,42 +442,7 @@
         f.innerText = "⚠️ ONES BAY OVERLOAD! Protocol limit is 9 cubes. Bundle 10 ones into 1 Tens Fuel Rod!";
     }
 
-    function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('drag-over'); }
-    function leaveDrop(ev) { ev.currentTarget.classList.remove('drag-over'); }
-    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
-
-    function drop(ev, binType) {
-        ev.preventDefault();
-        ev.currentTarget.classList.remove('drag-over');
-        let id = ev.dataTransfer.getData("text");
-        if (id === "source-rod" && binType === "tens") {
-            let clonedRod = document.createElement("div");
-            clonedRod.className = "token token-rod";
-            clonedRod.onclick = function() { this.remove(); updateCounters(); };
-            document.getElementById("tens-bin").appendChild(clonedRod);
-        } else if (id === "source-cube" && binType === "ones") {
-            let currentCubes = document.getElementById("ones-bin").getElementsByClassName("token-cube").length;
-            if (currentCubes >= 9) {
-                triggerOnesOverloadWarning();
-                return;
-            }
-            let clonedCube = document.createElement("div");
-            clonedCube.className = "token token-cube";
-            clonedCube.onclick = function() { 
-                this.remove(); 
-                updateCounters(); 
-                let f = document.getElementById("feed");
-                if (f.innerText.includes("ONES BAY OVERLOAD")) { f.innerText = ""; }
-            };
-            document.getElementById("ones-bin").appendChild(clonedCube);
-        }
-        updateCounters();
-    }
-
-    document.getElementById("source-rod").addEventListener("touchstart", handleMobileTapThrustTens);
-    document.getElementById("source-cube").addEventListener("touchstart", handleMobileTapThrustOnes);
-
-    function handleMobileTapThrustTens(e) {
+    function addTensRod() {
         let clonedRod = document.createElement("div");
         clonedRod.className = "token token-rod";
         clonedRod.onclick = function() { this.remove(); updateCounters(); };
@@ -483,7 +450,7 @@
         updateCounters();
     }
 
-    function handleMobileTapThrustOnes(e) {
+    function addOnesCube() {
         let currentCubes = document.getElementById("ones-bin").getElementsByClassName("token-cube").length;
         if (currentCubes >= 9) {
             triggerOnesOverloadWarning();
@@ -500,6 +467,37 @@
         document.getElementById("ones-bin").appendChild(clonedCube);
         updateCounters();
     }
+
+    function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('drag-over'); }
+    function leaveDrop(ev) { ev.currentTarget.classList.remove('drag-over'); }
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+
+    function drop(ev, binType) {
+        ev.preventDefault();
+        ev.currentTarget.classList.remove('drag-over');
+        let id = ev.dataTransfer.getData("text");
+        if (id === "source-rod" && binType === "tens") {
+            addTensRod();
+        } else if (id === "source-cube" && binType === "ones") {
+            addOnesCube();
+        }
+    }
+
+    // Click and Touch Listeners for Supply Shelf Items
+    const sourceRodElem = document.getElementById("source-rod");
+    const sourceCubeElem = document.getElementById("source-cube");
+
+    sourceRodElem.addEventListener("click", addTensRod);
+    sourceRodElem.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+        addTensRod();
+    });
+
+    sourceCubeElem.addEventListener("click", addOnesCube);
+    sourceCubeElem.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+        addOnesCube();
+    });
 
     function updateCounters() {
         countTens = document.getElementById("tens-bin").getElementsByClassName("token-rod").length;
@@ -646,7 +644,7 @@
         let f = document.getElementById("feed");
         if (finalSubmittedValue === 0) {
             f.style.color = "#ff3333";
-            f.innerText = "⚠️ Terminal empty! Drag pins into the containers to calibrate code values.";
+            f.innerText = "⚠️ Terminal empty! Click or drag pins into collectors to calibrate values.";
             return;
         }
         if (finalSubmittedValue === correctSolution) {
